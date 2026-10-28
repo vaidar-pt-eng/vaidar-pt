@@ -12,6 +12,9 @@ segurando os potes.
 - `artifact.html` — a mesma coisa sem as tags de documento, no formato que o
   publicador de Artifacts exige. **Não edite este arquivo**, ele é gerado.
 - `build-artifact.py` — gera o `artifact.html` a partir do `index.html`.
+- `doge.png` — o meme do swole doge, que aparece emoldurado nas janelas da
+  academia. Ele vai embutido no HTML como data URI, então o jogo continua
+  sendo um arquivo só; esse png fica aqui como original.
 
 ## Rodar
 
