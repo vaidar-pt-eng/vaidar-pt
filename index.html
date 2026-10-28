@@ -434,6 +434,8 @@ const CORACAO = sprite([
   "..rrr..",
   "...r...",
 ], { r:"#ff5c8a", b:"#ffd3e0" });
+// mesmo desenho todo escuro, para o contorno destacar da parede bege
+const CORACAO_BORDA = sprite(CORACAO.rows, { r:"#7e2f45", b:"#7e2f45" });
 
 /* a presidenta aparece quando junta 3 estrelas e segura os potes */
 const DILMA = sprite([
@@ -711,8 +713,8 @@ function soltarCoracao(x, y){
     x, y,
     vy: -(38 + Math.random()*26),
     fase: Math.random()*6,
-    px: Math.random() < 0.3 ? 3 : 2,
-    vida: 1.4 + Math.random()*0.6,
+    px: Math.random() < 0.35 ? 5 : 4,
+    vida: 1.6 + Math.random()*0.7,
     t: 0,
   });
 }
@@ -844,7 +846,7 @@ function atualizar(dt){
         particulas(it.x, it.y-20, "#ffd84d", 16);
         if (g.estrelas >= 3){
           g.estrelas = 0; g.escudo = 9; g.aviso = 1.8;
-          for (let k = 0; k < 9; k++) soltarCoracao(PLAYER_X + (Math.random()-.5)*60, g.y - 70 - Math.random()*30);
+          for (let k = 0; k < 9; k++) soltarCoracao(PLAYER_X + (Math.random()-.5)*70, g.y - 110 - Math.random()*30);
           SFX.life();
         } else SFX.pick();
       } else {
@@ -865,8 +867,8 @@ function atualizar(dt){
   // coraçõezinhos: de vez em quando, e bem mais com a Dilma por perto
   g.corT -= dt;
   if (g.corT <= 0){
-    soltarCoracao(PLAYER_X + (Math.random()-.5)*24, g.y - 78);
-    g.corT = g.escudo > 0 ? 0.25 + Math.random()*0.2 : 1.1 + Math.random()*1.2;
+    soltarCoracao(PLAYER_X + (Math.random()-.5)*24, g.y - 118);
+    g.corT = g.escudo > 0 ? 0.25 + Math.random()*0.2 : 0.7 + Math.random()*0.7;
   }
   for (let i = g.coracoes.length - 1; i >= 0; i--){
     const c = g.coracoes[i];
@@ -1180,7 +1182,10 @@ function drawCena(){
     for (const c of g.coracoes){
       const a = Math.min(1, c.t * 5, (c.vida - c.t) * 2);
       const w = CORACAO.w * c.px;
-      draw(CORACAO, c.x + Math.sin(c.fase) * 7 - w/2, c.y, c.px, a);
+      const x = c.x + Math.sin(c.fase) * 7 - w/2, b = Math.max(2, c.px/2);
+      ctx.globalAlpha = a;
+      for (const [dx, dy] of [[-b,0],[b,0],[0,-b],[0,b]]) draw(CORACAO_BORDA, x+dx, c.y+dy, c.px);
+      draw(CORACAO, x, c.y, c.px, a);
     }
 
     // partículas
