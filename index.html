@@ -1,0 +1,1021 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Natural na Academia</title>
+<style>
+  :root{
+    color-scheme: dark;
+    --bg:#06070a;
+    --panel:#0d1016;
+    --line:#1f242e;
+    --txt:#d8dce4;
+    --dim:#7e8695;
+    --red:#d94a4a;
+    --green:#4ad98a;
+    --yellow:#e8c75a;
+    --mono: ui-monospace, "SFMono-Regular", "Cascadia Mono", Consolas, "Courier New", monospace;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0; background:var(--bg); color:var(--txt);
+    font-family:var(--mono);
+    display:flex; align-items:center; justify-content:center;
+    padding:16px; overflow:hidden;
+    -webkit-tap-highlight-color:transparent;
+    touch-action:none; overscroll-behavior:none;
+    -webkit-user-select:none; user-select:none;
+  }
+  #app{
+    position:relative;
+    width:min(100%, calc((100vh - 32px) * 16 / 9));
+    max-width:1100px; aspect-ratio:16/9;
+    border:1px solid var(--line); border-radius:6px; overflow:hidden;
+    box-shadow:0 20px 60px rgba(0,0,0,.6);
+    background:#06070a; touch-action:none;
+  }
+  /* celular deitado: tela cheia, sem moldura */
+  @media (max-height:540px){
+    body{padding:0}
+    #app{width:100vw; height:100vh; height:100dvh; max-width:none; aspect-ratio:auto; border:0; border-radius:0}
+  }
+  canvas{display:block; width:100%; height:100%; object-fit:contain; image-rendering:pixelated}
+
+  /* ---------- HUD ---------- */
+  #hud{
+    position:absolute; inset:0 0 auto 0; padding:10px 14px;
+    display:flex; align-items:center; gap:14px;
+    font-size:11px; letter-spacing:.14em; pointer-events:none;
+    background:linear-gradient(#000000cc, #00000000);
+  }
+  #hearts{display:flex; gap:4px; min-width:92px}
+  .heart{width:15px;height:14px;display:block;color:var(--red);filter:drop-shadow(0 0 4px #d94a4a55)}
+  .heart.off{color:#3a3f49;opacity:.5;filter:none}
+  #progwrap{flex:1; display:flex; flex-direction:column; gap:5px; align-items:center}
+  #proglabels{display:flex; justify-content:space-between; width:100%; font-size:9px; color:var(--dim)}
+  #progbar{width:100%; height:3px; background:#ffffff1c; position:relative}
+  #progfill{position:absolute; inset:0 auto 0 0; width:0%; background:var(--yellow)}
+  #progdot{position:absolute; top:-3px; width:9px; height:9px; background:var(--yellow); left:0; transform:translateX(-50%); box-shadow:0 0 8px var(--yellow)}
+  #stats{min-width:92px; text-align:right; font-size:11px}
+  #stats b{color:#fff; font-weight:600}
+  #stats small{display:block; color:var(--dim); font-size:9px; letter-spacing:.1em}
+
+  /* ---------- telas ---------- */
+  .screen{
+    position:absolute; inset:0; display:none; flex-direction:column;
+    align-items:center; justify-content:center; text-align:center;
+    gap:14px; padding:24px; background:rgba(4,5,8,.86); backdrop-filter:blur(2px);
+    animation:fade .25s ease;
+  }
+  .screen.on{display:flex}
+  .screen{overflow:auto}
+  @keyframes fade{from{opacity:0}to{opacity:1}}
+  .eyebrow{color:var(--red); font-size:10px; letter-spacing:.42em}
+  h1{margin:0; font-size:clamp(22px,4.4vw,40px); font-weight:400; letter-spacing:.08em}
+  h1 small{display:block; font-size:12px; letter-spacing:.3em; color:var(--dim); margin-top:10px}
+  .lead{max-width:430px; margin:0; color:var(--dim); font-size:12px; line-height:1.75}
+  .legend{display:flex; flex-wrap:wrap; gap:4px 16px; justify-content:center; font-size:10px; color:var(--dim)}
+  .legend span{display:flex; align-items:center; gap:6px}
+  .dot{width:8px;height:8px;border-radius:1px;display:inline-block}
+  .keys{font-size:10px; color:#5d6473; letter-spacing:.16em}
+  .row{display:flex; gap:8px; align-items:center; flex-wrap:wrap; justify-content:center}
+  .lbl{font-size:10px; color:#5d6473; letter-spacing:.2em; margin-right:4px}
+  button{
+    font-family:var(--mono); font-size:11px; letter-spacing:.22em; color:var(--txt);
+    background:transparent; border:1px solid var(--line); padding:9px 16px;
+    cursor:pointer; transition:.15s;
+  }
+  button:hover{border-color:#49515f; color:#fff}
+  button.sel{border-color:var(--yellow); color:var(--yellow)}
+  button.primary{
+    border-color:#5a2730; background:#2a1116; color:#f0d6d6; padding:13px 34px; margin-top:4px;
+  }
+  button.primary:hover{background:#3a151c; border-color:var(--red); color:#fff}
+  .score{display:flex; gap:34px; justify-content:center; margin:2px 0}
+  .score div{font-size:10px; color:var(--dim); letter-spacing:.16em}
+  .score b{display:block; font-size:26px; color:#fff; font-weight:400; letter-spacing:.04em; margin-top:6px}
+  .foot{font-size:9px; color:#444b58; letter-spacing:.2em}
+
+  /* ---------- controles touch ---------- */
+  #touch{position:absolute; inset:0; display:none}
+  #touch .tz{position:absolute; left:0; right:0; height:50%; display:flex; align-items:center; justify-content:center}
+  #touch .tz.up{top:0} #touch .tz.dn{bottom:0}
+  #touch .tz span{font-size:26px; color:#ffffff14}
+  #touch.on{display:block}
+  @media (max-width:620px){
+    #hud{font-size:9px; gap:8px; padding:8px 10px}
+    #hearts,#stats{min-width:62px}
+    .lead{font-size:11px}
+  }
+  /* pouca altura (celular deitado): tudo mais compacto */
+  @media (max-height:480px){
+    #hud{padding:6px 10px; font-size:9px}
+    .heart{width:12px;height:11px}
+    .screen{gap:7px; padding:10px}
+    h1{font-size:clamp(17px,4.6vw,26px)}
+    h1 small{font-size:9px; margin-top:5px}
+    .lead{font-size:10px; line-height:1.5; max-width:400px}
+    .legend{font-size:9px; gap:2px 10px}
+    .keys{font-size:9px}
+    .eyebrow{font-size:9px}
+    button{padding:7px 12px}
+    button.primary{padding:10px 22px; margin-top:0}
+    .score{gap:22px} .score b{font-size:20px}
+  }
+  /* celular em pé: pede para girar */
+  #gira{
+    position:fixed; inset:0; z-index:60; display:none;
+    flex-direction:column; align-items:center; justify-content:center; gap:18px;
+    background:var(--bg); text-align:center; padding:24px;
+  }
+  #gira .ico{font-size:52px; color:var(--yellow); animation:gira 2.2s ease-in-out infinite}
+  @keyframes gira{0%,45%{transform:rotate(0)}55%,100%{transform:rotate(-90deg)}}
+  #gira p{margin:0; font-size:13px; letter-spacing:.2em}
+  #gira small{display:block; margin-top:10px; font-size:10px; color:var(--dim); letter-spacing:.14em}
+  body.retrato #gira{display:flex}
+  body.retrato.gira-ok #gira{display:none}
+  #gira button{margin-top:4px}
+</style>
+</head>
+<body>
+<div id="gira">
+  <div class="ico">⟳</div>
+  <p>VIRE O CELULAR<small>o treino é na horizontal</small></p>
+  <button id="btn-gira">JOGAR ASSIM MESMO</button>
+</div>
+
+<div id="app">
+  <canvas id="game" width="960" height="540"></canvas>
+
+  <div id="hud">
+    <div id="hearts"></div>
+    <div id="progwrap">
+      <div id="proglabels"><span>ACADEMIA</span><span id="progmid">SAÍDA</span></div>
+      <div id="progbar"><div id="progfill"></div><div id="progdot"></div></div>
+    </div>
+    <div id="stats"><b id="pts">0</b><small>PONTOS</small></div>
+  </div>
+
+  <div id="touch"><div class="tz up"><span>▲</span></div><div class="tz dn"><span>▼</span></div></div>
+
+  <!-- INÍCIO -->
+  <div class="screen on" id="scr-start">
+    <div class="eyebrow">OPERAÇÃO NATURAL</div>
+    <h1>O shape precisa atravessar<small>SEM SUPLEMENTO NENHUM</small></h1>
+    <p class="lead">Atravesse a academia até a saída sem encostar em creatina, whey ou pré-treino. Todo mundo quer te fazer tomar.</p>
+    <div class="legend">
+      <span><i class="dot" style="background:#15161a;outline:1px solid #f4f4f4"></i>creatina</span>
+      <span><i class="dot" style="background:#2b6fd6"></i>whey</span>
+      <span><i class="dot" style="background:#7a3cd6"></i>pré-treino</span>
+      <span><i class="dot" style="background:#b5652e"></i>frango +50</span>
+      <span><i class="dot" style="background:#e8c75a"></i>banana +1 vida</span>
+    </div>
+    <div class="keys">↑ ↓ / W S ou toque em cima e embaixo • → corre • ← segura • P pausa • M silencia</div>
+    <div class="row">
+      <span class="lbl">DIFICULDADE</span>
+      <button data-dif="facil">FÁCIL</button>
+      <button data-dif="normal" class="sel">NORMAL</button>
+      <button data-dif="dificil">DIFÍCIL</button>
+    </div>
+    <button class="primary" id="btn-start">COMEÇAR O TREINO</button>
+    <div class="foot" id="best-start"></div>
+  </div>
+
+  <!-- FIM -->
+  <div class="screen" id="scr-end">
+    <div class="eyebrow" id="end-eyebrow">FIM DE JOGO</div>
+    <h1 id="end-title">Você tomou creatina</h1>
+    <p class="lead" id="end-sub"></p>
+    <div class="score">
+      <div>PONTOS<b id="end-pts">0</b></div>
+      <div>METROS<b id="end-m">0</b></div>
+      <div>RECORDE<b id="end-best">0</b></div>
+    </div>
+    <button class="primary" id="btn-again">TENTAR DE NOVO</button>
+    <button id="btn-menu">MUDAR DIFICULDADE</button>
+  </div>
+
+  <!-- PAUSA -->
+  <div class="screen" id="scr-pause">
+    <div class="eyebrow">DESCANSO ENTRE SÉRIES</div>
+    <h1>Pausado</h1>
+    <button class="primary" id="btn-resume">VOLTAR</button>
+  </div>
+</div>
+
+<script>
+(() => {
+"use strict";
+
+/* ====================================================================
+   1. CONSTANTES / GEOMETRIA
+   ==================================================================== */
+let W = 960;              // largura lógica (acompanha o formato da tela)
+let ESC = 1;              // escala de velocidade em relação ao desenho base
+const H = 540;
+const ROAD_TOP = 200, ROAD_BOT = 472;
+const LANES = 4;
+const LANE_H = (ROAD_BOT - ROAD_TOP) / LANES;
+const laneY = i => ROAD_TOP + LANE_H * (i + 0.5);
+let PLAYER_X = 170;
+
+const DIF = {
+  facil:   { speed:195, ramp:16, spawn:1.30, dens:0.36, lives:5, meta:900,  label:"FÁCIL"   },
+  normal:  { speed:235, ramp:24, spawn:1.05, dens:0.48, lives:3, meta:1200, label:"NORMAL"  },
+  dificil: { speed:285, ramp:34, spawn:0.80, dens:0.66, lives:2, meta:1600, label:"DIFÍCIL" },
+};
+
+const canvas = document.getElementById("game");
+const ctx = canvas.getContext("2d");
+ctx.imageSmoothingEnabled = false;
+
+// o canvas acompanha o formato do container: a altura lógica é fixa (540) e a
+// largura segue a proporção da tela, então nada estica no celular deitado
+const app = document.getElementById("app");
+function fitCanvas(){
+  const r = app.getBoundingClientRect();
+  const prop = r.height > 0 ? r.width / r.height : 16/9;
+  W = Math.round(Math.max(620, Math.min(1500, H * prop)));
+  PLAYER_X = Math.round(W * 0.175);
+  ESC = W / 960;
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  canvas.width = Math.round(W * dpr); canvas.height = Math.round(H * dpr);
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  ctx.imageSmoothingEnabled = false;
+}
+fitCanvas();
+addEventListener("resize", fitCanvas);
+addEventListener("orientationchange", () => setTimeout(fitCanvas, 120));
+
+/* ====================================================================
+   2. PIXEL ART  (cada sprite é uma matriz de caracteres + paleta)
+   ==================================================================== */
+function sprite(rows, pal){ return { rows, pal, w: rows[0].length, h: rows.length }; }
+
+function draw(sp, x, y, px, alpha){
+  if (alpha !== undefined) ctx.globalAlpha = alpha;
+  for (let r = 0; r < sp.rows.length; r++){
+    const row = sp.rows[r];
+    for (let c = 0; c < row.length; c++){
+      const ch = row[c];
+      if (ch === ".") continue;
+      ctx.fillStyle = sp.pal[ch];
+      ctx.fillRect(Math.round(x + c*px), Math.round(y + r*px), px, px);
+    }
+  }
+  if (alpha !== undefined) ctx.globalAlpha = 1;
+}
+
+const PAL_P = { h:"#2e2119", s:"#e8b48a", e:"#14161b", m:"#a9553f", t:"#eceff3", p:"#2f5fa8", l:"#e8b48a", c:"#d94a4a" };
+const PLAYER_A = sprite([
+  "...hhhhhh...",
+  "..hhhhhhhh..",
+  "..hssssssh..",
+  "..hsessesh..",
+  "..hssmmssh..",
+  "...ssssss...",
+  ".....ss.....",
+  "..stttttts..",
+  "..stttttts..",
+  "..stttttts..",
+  "...tttttt...",
+  "...pppppp...",
+  "...pp..pp...",
+  "...ll..ll...",
+  "...ll..ll...",
+  "..ccc..ccc..",
+], PAL_P);
+const PLAYER_B = sprite([
+  "...hhhhhh...",
+  "..hhhhhhhh..",
+  "..hssssssh..",
+  "..hsessesh..",
+  "..hssmmssh..",
+  "...ssssss...",
+  ".....ss.....",
+  "..stttttts..",
+  "..stttttts..",
+  "..stttttts..",
+  "...tttttt...",
+  "...pppppp...",
+  "...pp..pp...",
+  "...ll..ll...",
+  "..ll....ll..",
+  ".ccc....ccc.",
+], PAL_P);
+
+/* saco de creatina: pouch preto com faixa branca escrita CREATINA */
+const CREATINA = sprite([
+  ".....oooooooo.....",
+  "..ookkkkkkkkkkoo..",
+  ".okkkkkkkkkkkkkko.",
+  ".okkkkkkkkkkkkkko.",
+  ".owwwwwwwwwwwwwwo.",
+  ".owwwwwwwwwwwwwwo.",
+  ".owwwwwwwwwwwwwwo.",
+  ".orrrrrrrrrrrrrro.",
+  ".okkkkkkkkkkkkkko.",
+  ".okkkkkkkkkkkkkko.",
+  ".okkkkkkkkkkkkkko.",
+  "..oooooooooooooo..",
+], { o:"#05060a", k:"#15161a", w:"#f4f4f4", r:"#d94a4a" });
+
+/* pote de whey: tampa clara, corpo azul e faixa branca escrita WHEY */
+const WHEY = sprite([
+  "...oooooooooo...",
+  "..ollllllllllo..",
+  "..oLLLLLLLLLLo..",
+  ".obbbbbbbbbbbbo.",
+  ".obbbbbbbbbbbbo.",
+  ".owwwwwwwwwwwwo.",
+  ".owwwwwwwwwwwwo.",
+  ".owwwwwwwwwwwwo.",
+  ".oyyyyyyyyyyyyo.",
+  ".obbbbbbbbbbbbo.",
+  ".obbbbbbbbbbbbo.",
+  ".obbbbbbbbbbbbo.",
+  ".obBBBBBBBBBBbo.",
+  "..oooooooooooo..",
+], { o:"#05060a", l:"#eceff3", L:"#c3c7d1", b:"#2b6fd6", B:"#2259ab", w:"#f4f4f4", y:"#e8c75a" });
+
+/* lata de pré-treino */
+const PRETREINO = sprite([
+  "..oooooooo..",
+  ".ommmmmmmmo.",
+  ".ommmmmmmmo.",
+  ".oppppppppo.",
+  ".onnnnnnnno.",
+  ".onnnnnnnno.",
+  ".onnnnnnnno.",
+  ".oppppppppo.",
+  ".oppppppppo.",
+  ".ommmmmmmmo.",
+  ".ommmmmmmmo.",
+  "..oooooooo..",
+], { o:"#05060a", m:"#c9ccd6", p:"#7a3cd6", n:"#39e0a0" });
+
+const FRANGO = sprite([
+  "....oooo....",
+  "..oommmmoo..",
+  ".ommmmmmmmo.",
+  ".ommmmmmmmo.",
+  ".ommmmmmMMo.",
+  "..ommmmMMo..",
+  "...obbbo....",
+  "...obbbo....",
+  "..obbbbbo...",
+  "..obbbbbo...",
+  "...ooooo....",
+], { o:"#2a1407", m:"#c2702e", M:"#8e4a1c", b:"#efe3c4" });
+
+const BANANA = sprite([
+  "......ooo...",
+  ".....oyyo...",
+  "....oyyyo...",
+  ".ooyyyyyo...",
+  ".oyyyyyo....",
+  ".oyyyyo.....",
+  "..oyyo......",
+  "...oo.......",
+], { o:"#6b5410", y:"#e8c75a" });
+
+/* tipos de obstáculo: sprite, escala, velocidade extra em relação ao chão */
+const TIPOS = {
+  creatina:  { sp:CREATINA,  px:4, extra:  0, zig:false, nome:"uma creatina",
+               rot:{ txt:"CREATINA", cx:9, cy:5.5, w:14, tam:12, cor:"#15161a" } },
+  whey:      { sp:WHEY,      px:4, extra:-35, zig:false, nome:"um pote de whey",
+               rot:{ txt:"WHEY",     cx:8, cy:6.5, w:12, tam:15, cor:"#1b3f7a" } },
+  pretreino: { sp:PRETREINO, px:4, extra:120, zig:true,  nome:"um pré-treino",
+               rot:{ txt:"PRÉ",      cx:6, cy:5.5, w:8,  tam:12, cor:"#0e3b2a" } },
+};
+
+// escreve o nome do suplemento na faixa do rótulo, condensando se não couber
+function rotulo(r, bx, by, px){
+  ctx.save();
+  ctx.font = "700 " + r.tam + "px ui-monospace, Consolas, monospace";
+  ctx.textAlign = "center"; ctx.textBaseline = "middle";
+  const larg = ctx.measureText(r.txt).width;
+  const k = Math.min(1, (r.w * px - 2) / larg);
+  ctx.translate(bx + r.cx * px, by + r.cy * px);
+  ctx.scale(k, 1);
+  ctx.fillStyle = r.cor;
+  ctx.fillText(r.txt, 0, 0);
+  ctx.restore();
+}
+
+/* ====================================================================
+   3. SOM (WebAudio, sem arquivos)
+   ==================================================================== */
+// localStorage pode estar bloqueado (aba anônima, etc.)
+const LS = {
+  get(k, d){ try{ const v = localStorage.getItem(k); return v === null ? d : v; }catch(e){ return d; } },
+  set(k, v){ try{ localStorage.setItem(k, v); }catch(e){} },
+};
+
+let actx = null;
+let muted = LS.get("natural.muted", "0") === "1";
+function audio(){ if(!actx) actx = new (window.AudioContext||window.webkitAudioContext)(); return actx; }
+function beep(freq, dur, type, vol){
+  if (muted) return;
+  try{
+    const a = audio(), o = a.createOscillator(), g = a.createGain();
+    o.type = type || "square"; o.frequency.value = freq;
+    g.gain.setValueAtTime(vol || 0.05, a.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.0001, a.currentTime + dur);
+    o.connect(g).connect(a.destination); o.start(); o.stop(a.currentTime + dur);
+  }catch(e){}
+}
+function noise(dur, vol){
+  if (muted) return;
+  try{
+    const a = audio(), n = a.sampleRate * dur;
+    const buf = a.createBuffer(1, n, a.sampleRate), d = buf.getChannelData(0);
+    for (let i=0;i<n;i++) d[i] = (Math.random()*2-1) * (1 - i/n);
+    const src = a.createBufferSource(); src.buffer = buf;
+    const g = a.createGain(); g.gain.value = vol || 0.12;
+    src.connect(g).connect(a.destination); src.start();
+  }catch(e){}
+}
+const SFX = {
+  lane:  () => beep(520, .05, "square", .03),
+  hit:   () => { noise(.3,.16); beep(120,.25,"sawtooth",.08); },
+  pick:  () => { beep(660,.07,"square",.05); setTimeout(()=>beep(990,.09,"square",.05),70); },
+  life:  () => { beep(520,.08,"triangle",.07); setTimeout(()=>beep(780,.1,"triangle",.07),80); setTimeout(()=>beep(1040,.14,"triangle",.07),170); },
+  win:   () => [0,120,240,420].forEach((d,i)=>setTimeout(()=>beep([523,659,784,1047][i],.2,"triangle",.07),d)),
+  over:  () => [0,130,260].forEach((d,i)=>setTimeout(()=>beep([330,260,180][i],.26,"sawtooth",.07),d)),
+};
+
+/* ====================================================================
+   4. ESTADO DO JOGO
+   ==================================================================== */
+const ST = { START:"start", PLAY:"play", PAUSE:"pause", END:"end" };
+let state = ST.START;
+let dif = DIF[LS.get("natural.dif", "normal")] ? LS.get("natural.dif", "normal") : "normal";
+let cfg = DIF[dif];
+
+let game = null;
+function novoJogo(){
+  cfg = DIF[dif];
+  // ?meta=300 encurta a travessia (útil pra testar o final)
+  const metaURL = parseInt(new URLSearchParams(location.search).get("meta"), 10);
+  game = {
+    meta: metaURL > 0 ? metaURL : cfg.meta,
+    t: 0,
+    scroll: 0,
+    dist: 0,            // metros percorridos
+    vidas: cfg.lives,
+    maxVidas: cfg.lives,
+    pontos: 0,
+    bonus: 0,
+    frangos: 0,
+    lane: 1,
+    laneAlvo: 1,
+    y: laneY(1),
+    inv: 0,             // invencibilidade pós-dano
+    shake: 0,
+    obst: [],
+    itens: [],
+    parts: [],
+    spawnT: 0.8,
+    itemT: 3.2,
+    portao: null,       // portão de saída
+    acabou: false,
+    motivo: "",
+    venceu: false,
+  };
+}
+
+/* ====================================================================
+   5. ENTRADA
+   ==================================================================== */
+const keys = Object.create(null);
+addEventListener("keydown", e => {
+  const k = e.key.toLowerCase();
+  if (["arrowup","arrowdown","arrowleft","arrowright"," "].includes(k)) e.preventDefault();
+  if (keys[k]) return;
+  keys[k] = true;
+
+  if (state === ST.PLAY){
+    if (k === "arrowup" || k === "w") mudarRaia(-1);
+    if (k === "arrowdown" || k === "s") mudarRaia(1);
+    if (k === "p" || k === "escape") pausar(true);
+  } else if (state === ST.PAUSE && (k === "p" || k === "escape")){
+    pausar(false);
+  } else if (state === ST.START && (k === "enter" || k === " ")){
+    comecar();
+  } else if (state === ST.END && (k === "enter" || k === " ")){
+    comecar();
+  }
+  if (k === "m"){
+    muted = !muted;
+    LS.set("natural.muted", muted ? "1" : "0");
+  }
+});
+addEventListener("keyup", e => { keys[e.key.toLowerCase()] = false; });
+
+function mudarRaia(d){
+  const alvo = Math.max(0, Math.min(LANES-1, game.laneAlvo + d));
+  if (alvo !== game.laneAlvo){ game.laneAlvo = alvo; SFX.lane(); }
+}
+
+// toque (ou clique): metade de cima sobe, metade de baixo desce.
+// nada aqui depende de media query - tem celular que se declara "pointer:fine"
+// e o jogo ficava sem controle nenhum.
+const touch = document.getElementById("touch");
+function tocar(clientY){
+  if (state !== ST.PLAY) return;
+  const r = touch.getBoundingClientRect();
+  mudarRaia(clientY - r.top < r.height/2 ? -1 : 1);
+}
+if (window.PointerEvent){
+  touch.addEventListener("pointerdown", e => { e.preventDefault(); tocar(e.clientY); });
+} else {
+  touch.addEventListener("touchstart", e => { e.preventDefault(); tocar(e.touches[0].clientY); }, { passive:false });
+  touch.addEventListener("mousedown", e => tocar(e.clientY));
+}
+
+/* ====================================================================
+   6. LÓGICA
+   ==================================================================== */
+function velocidade(){
+  const base = cfg.speed + cfg.ramp * Math.min(game.t, 60) / 6;
+  let mult = 1;
+  if (keys["arrowright"] || keys["d"]) mult = 1.45;
+  else if (keys["arrowleft"] || keys["a"]) mult = 0.68;
+  return base * mult * ESC;
+}
+
+function spawnOnda(){
+  const safe = (Math.random() * LANES) | 0;              // uma raia sempre livre
+  const tipos = ["creatina","whey"];
+  if (dif !== "facil" && game.dist > 150) tipos.push("pretreino");
+  for (let i = 0; i < LANES; i++){
+    if (i === safe) continue;
+    if (Math.random() > cfg.dens) continue;
+    const tipo = tipos[(Math.random()*tipos.length)|0];
+    const t = TIPOS[tipo];
+    game.obst.push({
+      tipo, t,
+      x: W + 40 + Math.random()*120,
+      lane: i,
+      y: laneY(i),
+      w: t.sp.w * t.px,
+      h: t.sp.h * t.px,
+      rot: 0,
+      zigT: 0.9 + Math.random()*0.6,
+    });
+  }
+}
+
+function spawnItem(){
+  const lane = (Math.random()*LANES)|0;
+  const vidaBaixa = game.vidas < game.maxVidas;
+  const tipo = (vidaBaixa && Math.random() < 0.28) ? "banana" : "frango";
+  const sp = tipo === "banana" ? BANANA : FRANGO;
+  const px = 4;
+  game.itens.push({ tipo, sp, px, x: W + 40, lane, y: laneY(lane), w: sp.w*px, h: sp.h*px, oy: 10, bob: Math.random()*6 });
+}
+
+function particulas(x, y, cor, n){
+  for (let i = 0; i < n; i++){
+    game.parts.push({
+      x, y,
+      vx: (Math.random()-0.5) * 260 - 40,
+      vy: (Math.random()-0.5) * 220,
+      vida: 0.4 + Math.random()*0.5,
+      t: 0, cor, s: 1 + Math.random()*3,
+    });
+  }
+}
+
+// caixa de colisão: o sprite é desenhado de (y - h + oy) até (y + oy);
+// fx/fy encolhem a caixa em fração da largura/altura para o toque ser justo.
+function caixa(e, fx, fy){
+  const px = e.w * fx, py = e.h * fy;
+  const oy = e.oy === undefined ? 18 : e.oy;
+  return { x: e.x - e.w/2 + px, y: e.y - e.h + oy + py, w: e.w - px*2, h: e.h - py*2 };
+}
+function bateu(a, b){
+  return a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y;
+}
+
+function levarDano(obj){
+  game.vidas--;
+  game.inv = 1.5;
+  game.shake = 14;
+  SFX.hit();
+  const cor = obj.tipo === "creatina" ? "#f4f4f4" : obj.tipo === "whey" ? "#9fc2f2" : "#b58cf0";
+  particulas(obj.x, obj.y - 20, cor, 26);
+  if (game.vidas <= 0) fim(false, obj.t.nome);
+}
+
+function fim(venceu, motivo){
+  game.acabou = true;
+  game.venceu = venceu;
+  game.motivo = motivo || "";
+  game.shake = 0;
+  state = ST.END;
+  atualizarHUD();
+  venceu ? SFX.win() : SFX.over();
+  telaFim();
+}
+
+function atualizar(dt){
+  const g = game;
+  g.t += dt;
+  const v = velocidade();
+  g.scroll += v * dt;
+  if (!g.portao) g.dist += v * dt / (18 * ESC);
+
+  // trocar de raia suavemente
+  const alvoY = laneY(g.laneAlvo);
+  g.y += (alvoY - g.y) * Math.min(1, dt * 14);
+  g.lane = g.laneAlvo;
+
+  if (g.inv > 0) g.inv -= dt;
+  if (g.shake > 0) g.shake = Math.max(0, g.shake - dt * 42);
+
+  // chegou na meta -> entra o portão da saída
+  if (!g.portao && g.dist >= g.meta){
+    g.portao = { x: W + 120 };
+    SFX.pick();
+  }
+
+  // spawns
+  if (!g.portao){
+    g.spawnT -= dt;
+    if (g.spawnT <= 0){
+      spawnOnda();
+      const acel = Math.min(0.34, g.t * 0.004);
+      g.spawnT = Math.max(0.52, cfg.spawn - acel) * (0.85 + Math.random()*0.35);
+    }
+    g.itemT -= dt;
+    if (g.itemT <= 0){ spawnItem(); g.itemT = 3.6 + Math.random()*3.4; }
+  }
+
+  const pBox = { x: PLAYER_X - 16, y: g.y - 44, w: 32, h: 54 };
+
+  // obstáculos
+  for (let i = g.obst.length - 1; i >= 0; i--){
+    const o = g.obst[i];
+    o.x -= (v + o.t.extra * ESC) * dt;
+    o.rot += dt * 4;
+    if (o.t.zig){
+      o.zigT -= dt;
+      if (o.zigT <= 0){
+        o.lane = Math.max(0, Math.min(LANES-1, o.lane + (Math.random()<0.5?-1:1)));
+        o.zigT = 0.75 + Math.random()*0.5;
+      }
+      o.y += (laneY(o.lane) - o.y) * Math.min(1, dt*8);
+    }
+    if (o.x < -90){ g.obst.splice(i,1); g.bonus += 2; continue; }
+    if (g.inv <= 0 && bateu(pBox, caixa(o, .18, .16))){
+      g.obst.splice(i,1);
+      levarDano(o);
+      if (g.acabou) return;
+    }
+  }
+
+  // itens
+  for (let i = g.itens.length - 1; i >= 0; i--){
+    const it = g.itens[i];
+    it.x -= v * dt;
+    it.bob += dt * 5;
+    if (it.x < -60){ g.itens.splice(i,1); continue; }
+    if (bateu(pBox, caixa(it, .12, .14))){
+      g.itens.splice(i,1);
+      if (it.tipo === "banana"){
+        game.vidas = Math.min(game.maxVidas, game.vidas + 1);
+        SFX.life(); particulas(it.x, it.y-20, "#e8c75a", 16);
+      } else {
+        game.frangos++; game.pontos += 50;
+        SFX.pick(); particulas(it.x, it.y-20, "#e6b07a", 14);
+      }
+    }
+  }
+
+  // partículas
+  for (let i = g.parts.length - 1; i >= 0; i--){
+    const p = g.parts[i];
+    p.t += dt;
+    if (p.t >= p.vida){ g.parts.splice(i,1); continue; }
+    p.x += p.vx * dt; p.y += p.vy * dt; p.vy += 220 * dt;
+  }
+
+  // portão
+  if (g.portao){
+    g.portao.x -= v * dt;
+    if (g.portao.x <= PLAYER_X){ fim(true); return; }
+  }
+
+  g.pontos = Math.floor(g.dist) + g.frangos * 50 + g.bonus;
+  atualizarHUD();
+}
+
+/* ====================================================================
+   7. DESENHO
+   ==================================================================== */
+function drawFundo(){
+  const g = game, s = g ? g.scroll : 0;
+
+  // parede do fundo
+  const grad = ctx.createLinearGradient(0,0,0,ROAD_TOP);
+  grad.addColorStop(0,"#080a0e"); grad.addColorStop(1,"#141922");
+  ctx.fillStyle = grad; ctx.fillRect(0,0,W,ROAD_TOP);
+
+  // espelhos (parallax lento)
+  const off = (s * 0.18) % 170;
+  for (let x = -170 - off; x < W + 170; x += 170){
+    ctx.fillStyle = "#121722";
+    ctx.fillRect(x+8, 44, 154, ROAD_TOP-58);
+    const gg = ctx.createLinearGradient(x+8,44,x+162,ROAD_TOP);
+    gg.addColorStop(0,"#1b2433"); gg.addColorStop(.5,"#10151e"); gg.addColorStop(1,"#1a2130");
+    ctx.fillStyle = gg; ctx.fillRect(x+10, 46, 150, ROAD_TOP-62);
+    ctx.fillStyle = "#ffffff0d";
+    ctx.fillRect(x+22, 54, 10, ROAD_TOP-76);
+    ctx.fillStyle = "#0b0e14";
+    ctx.fillRect(x+162, 44, 8, ROAD_TOP-58);
+  }
+
+  // equipamentos (silhuetas, parallax médio)
+  const off2 = (s * 0.45) % 240;
+  ctx.fillStyle = "#0a0d13";
+  for (let x = -240 - off2; x < W + 240; x += 240){
+    ctx.fillRect(x+20, 150, 80, 48);            // rack
+    ctx.fillRect(x+16, 142, 88, 8);
+    ctx.fillRect(x+130, 170, 56, 28);           // banco
+    ctx.fillRect(x+152, 160, 12, 12);
+    for (let d = 0; d < 3; d++){ ctx.fillRect(x+26 + d*26, 158, 20, 10); }
+  }
+
+  // letreiro neon
+  const fl = 0.82 + Math.sin((g?g.t:0) * 9) * 0.06 + Math.sin((g?g.t:0)*2.3)*0.1;
+  ctx.save();
+  ctx.globalAlpha = Math.max(.35, fl);
+  ctx.font = "600 26px ui-monospace, Consolas, monospace";
+  ctx.textAlign = "center";
+  ctx.shadowColor = "#d94a4a"; ctx.shadowBlur = 22;
+  ctx.fillStyle = "#ff7b7b";
+  ctx.fillText("A C A D E M I A   2 4 h", W/2, 118);
+  ctx.restore();
+
+  // borda superior do piso
+  ctx.fillStyle = "#1c222c"; ctx.fillRect(0, ROAD_TOP-16, W, 16);
+  ctx.fillStyle = "#283040"; ctx.fillRect(0, ROAD_TOP-16, W, 3);
+
+  // piso
+  const fg = ctx.createLinearGradient(0,ROAD_TOP,0,ROAD_BOT);
+  fg.addColorStop(0,"#262b34"); fg.addColorStop(.5,"#1e222a"); fg.addColorStop(1,"#171a21");
+  ctx.fillStyle = fg; ctx.fillRect(0, ROAD_TOP, W, ROAD_BOT-ROAD_TOP);
+
+  // setas no chão
+  const off3 = (s * 1) % 300;
+  ctx.fillStyle = "#ffffff0a";
+  for (let x = -300 - off3; x < W+300; x += 300){
+    for (const l of [0, 3]){
+      const y = laneY(l);
+      ctx.beginPath();
+      ctx.moveTo(x, y-10); ctx.lineTo(x+22, y); ctx.lineTo(x, y+10); ctx.closePath(); ctx.fill();
+    }
+  }
+
+  // divisórias tracejadas
+  ctx.save();
+  ctx.strokeStyle = "#d8b24a66"; ctx.lineWidth = 3;
+  ctx.setLineDash([46, 34]);
+  ctx.lineDashOffset = -(s % 80);
+  for (let i = 1; i < LANES; i++){
+    const y = ROAD_TOP + LANE_H * i;
+    ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke();
+  }
+  ctx.restore();
+
+  // borda inferior / tatame
+  ctx.fillStyle = "#1c222c"; ctx.fillRect(0, ROAD_BOT, W, H-ROAD_BOT);
+  ctx.fillStyle = "#283040"; ctx.fillRect(0, ROAD_BOT, W, 3);
+  const off4 = (s * 1.15) % 120;
+  ctx.fillStyle = "#151a22";
+  for (let x = -120 - off4; x < W+120; x += 120) ctx.fillRect(x+6, ROAD_BOT+12, 108, 44);
+}
+
+function sombra(x, y, w, a){
+  ctx.save();
+  ctx.globalAlpha = a === undefined ? .35 : a;
+  ctx.fillStyle = "#000";
+  ctx.beginPath(); ctx.ellipse(x, y+6, w/2, w/6, 0, 0, Math.PI*2); ctx.fill();
+  ctx.restore();
+}
+
+function drawPortao(){
+  const p = game.portao; if (!p) return;
+  const x = p.x;
+  ctx.save();
+  ctx.fillStyle = "#0e1a14";
+  ctx.fillRect(x-6, ROAD_TOP-30, 14, ROAD_BOT-ROAD_TOP+40);
+  ctx.fillStyle = "#4ad98a";
+  ctx.fillRect(x-6, ROAD_TOP-30, 14, 6);
+  ctx.shadowColor = "#4ad98a"; ctx.shadowBlur = 20;
+  ctx.fillStyle = "#4ad98a";
+  ctx.fillRect(x-2, ROAD_TOP-30, 4, ROAD_BOT-ROAD_TOP+40);
+  ctx.font = "600 16px ui-monospace, Consolas, monospace";
+  ctx.textAlign = "center"; ctx.fillStyle = "#9bf0c4";
+  ctx.fillText("S A Í D A", x, ROAD_TOP-44);
+  ctx.restore();
+}
+
+function drawJogador(){
+  const g = game;
+  const piscando = g.inv > 0 && Math.floor(g.t * 14) % 2 === 0;
+  const px = 4;
+  const sp = (Math.floor(g.scroll / 26) % 2 === 0) ? PLAYER_A : PLAYER_B;
+  const w = sp.w * px, h = sp.h * px;
+  const x = PLAYER_X - w/2;
+  const y = g.y - h + 18;
+  sombra(PLAYER_X, g.y + 10, 40, .4);
+  if (!piscando) draw(sp, x, y, px);
+
+  // plaquinha "NATURAL"
+  ctx.save();
+  ctx.font = "600 10px ui-monospace, Consolas, monospace";
+  ctx.textAlign = "center";
+  const label = "NATURAL", tw = ctx.measureText(label).width + 14;
+  ctx.fillStyle = "#0b0e14dd";
+  ctx.fillRect(PLAYER_X - tw/2, y - 20, tw, 15);
+  ctx.strokeStyle = "#e8c75a55"; ctx.lineWidth = 1;
+  ctx.strokeRect(PLAYER_X - tw/2 + .5, y - 19.5, tw-1, 14);
+  ctx.fillStyle = "#e8c75a";
+  ctx.fillText(label, PLAYER_X, y - 9);
+  ctx.restore();
+}
+
+function drawCena(){
+  const g = game;
+  ctx.save();
+  if (g && g.shake > 0){
+    ctx.translate((Math.random()-.5)*g.shake, (Math.random()-.5)*g.shake);
+  }
+  drawFundo();
+
+  if (g){
+    // obstáculos
+    for (const o of g.obst){
+      const bx = o.x - o.w/2, by = o.y - o.h + 18;
+      sombra(o.x, o.y + 10, o.w * .8);
+      draw(o.t.sp, bx, by, o.t.px);
+      if (o.t.rot) rotulo(o.t.rot, bx, by, o.t.px);
+    }
+    // itens (flutuando)
+    for (const it of g.itens){
+      const fy = Math.sin(it.bob) * 5;
+      sombra(it.x, it.y + 10, it.w * .7, .25);
+      ctx.save();
+      ctx.shadowColor = it.tipo === "banana" ? "#e8c75a" : "#e6b07a";
+      ctx.shadowBlur = 12;
+      draw(it.sp, it.x - it.w/2, it.y - it.h + 10 + fy, it.px);
+      ctx.restore();
+    }
+    drawPortao();
+    drawJogador();
+
+    // partículas
+    for (const p of g.parts){
+      ctx.globalAlpha = Math.max(0, 1 - p.t / p.vida);
+      ctx.fillStyle = p.cor;
+      ctx.fillRect(p.x, p.y, p.s, p.s);
+    }
+    ctx.globalAlpha = 1;
+  }
+
+  // vinheta
+  const vg = ctx.createRadialGradient(W/2, H/2, H*0.5, W/2, H/2, H*1.05);
+  vg.addColorStop(0, "#00000000"); vg.addColorStop(1, "#00000077");
+  ctx.fillStyle = vg; ctx.fillRect(0,0,W,H);
+  ctx.restore();
+}
+
+/* ====================================================================
+   8. HUD E TELAS
+   ==================================================================== */
+const el = id => document.getElementById(id);
+const hearts = el("hearts"), progfill = el("progfill"), progdot = el("progdot"), pts = el("pts");
+
+function atualizarHUD(){
+  const g = game; if (!g) return;
+  if (hearts.childElementCount !== g.maxVidas){
+    hearts.innerHTML = "";
+    for (let i=0;i<g.maxVidas;i++){
+      hearts.insertAdjacentHTML("beforeend",
+        '<svg class="heart" viewBox="0 0 16 15" fill="currentColor" aria-hidden="true">' +
+        '<path d="M8 14.2 1.5 7.6A4.1 4.1 0 0 1 8 2.9a4.1 4.1 0 0 1 6.5 4.7Z"/></svg>');
+    }
+  }
+  [...hearts.children].forEach((h,i)=> h.classList.toggle("off", i >= g.vidas));
+  const p = Math.min(100, g.dist / g.meta * 100);
+  progfill.style.width = p + "%";
+  progdot.style.left = p + "%";
+  pts.textContent = g.pontos;
+}
+
+function mostrar(id){
+  for (const s of document.querySelectorAll(".screen")) s.classList.remove("on");
+  if (id) el(id).classList.add("on");
+}
+
+function best(){ return +LS.get("natural.best." + dif, 0) || 0; }
+function setBest(v){ LS.set("natural.best." + dif, String(v)); }
+
+function telaInicio(){
+  state = ST.START;
+  mostrar("scr-start");
+  el("best-start").textContent = best() ? "RECORDE EM " + cfg.label + ": " + best() + " PONTOS" : "";
+}
+
+const cap = t => t.charAt(0).toUpperCase() + t.slice(1);
+
+function telaFim(){
+  const g = game;
+  const recorde = g.pontos > best();
+  if (recorde) setBest(g.pontos);
+  el("end-eyebrow").textContent = g.venceu ? "MISSÃO CUMPRIDA" : "FIM DE JOGO";
+  el("end-title").textContent = g.venceu ? "Você continua natural" : "Pegaram você";
+  el("end-sub").textContent = g.venceu
+    ? "Atravessou a academia inteira sem tocar em um pote sequer. Frango com batata doce te espera lá fora."
+    : cap(g.motivo) + " te acertou em cheio. Amanhã você volta." + (recorde ? " Mas que recorde, hein." : "");
+  el("end-pts").textContent = g.pontos;
+  el("end-m").textContent = Math.floor(g.dist);
+  el("end-best").textContent = best();
+  mostrar("scr-end");
+}
+
+function comecar(){
+  novoJogo();
+  atualizarHUD();
+  mostrar(null);
+  document.getElementById("touch").classList.add("on");
+  state = ST.PLAY;
+  try { const a = audio(); if (a.state === "suspended") a.resume(); } catch(e){}
+}
+
+function pausar(p){
+  if (p && state === ST.PLAY){ state = ST.PAUSE; mostrar("scr-pause"); }
+  else if (!p && state === ST.PAUSE){ state = ST.PLAY; mostrar(null); }
+}
+
+// botões
+for (const b of document.querySelectorAll("[data-dif]")){
+  b.addEventListener("click", () => {
+    dif = b.dataset.dif; cfg = DIF[dif];
+    LS.set("natural.dif", dif);
+    document.querySelectorAll("[data-dif]").forEach(x => x.classList.toggle("sel", x === b));
+    el("best-start").textContent = best() ? "RECORDE EM " + cfg.label + ": " + best() + " PONTOS" : "";
+  });
+  b.classList.toggle("sel", b.dataset.dif === dif);
+}
+el("btn-start").addEventListener("click", comecar);
+el("btn-again").addEventListener("click", comecar);
+el("btn-menu").addEventListener("click", telaInicio);
+el("btn-resume").addEventListener("click", () => pausar(false));
+
+/* ====================================================================
+   9. LOOP
+   ==================================================================== */
+// celular em pe: o aviso de girar cobre a tela e pausa o jogo,
+// mas da pra dispensar o aviso e jogar em pe mesmo assim.
+function checarRetrato(){
+  const emPe = innerHeight > innerWidth && Math.min(innerWidth, innerHeight) < 900;
+  document.body.classList.toggle("retrato", emPe);
+  if (emPe && !document.body.classList.contains("gira-ok")) pausar(true);
+  fitCanvas();
+}
+addEventListener("resize", checarRetrato);
+document.getElementById("btn-gira").addEventListener("click", () => {
+  document.body.classList.add("gira-ok");
+  fitCanvas();
+});
+checarRetrato();
+
+document.addEventListener("visibilitychange", () => {
+  if (document.hidden) pausar(true);
+  last = performance.now();
+});
+
+let last = performance.now();
+function loop(now){
+  const dt = Math.min(0.05, (now - last) / 1000);
+  last = now;
+  if (state === ST.PLAY) atualizar(dt);
+  else if (game && state === ST.END) { game.t += dt; }
+  drawCena();
+  requestAnimationFrame(loop);
+}
+
+cfg = DIF[dif];
+telaInicio();
+requestAnimationFrame(loop);
+
+})();
+</script>
+</body>
+</html>
