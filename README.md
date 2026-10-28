@@ -43,3 +43,15 @@ Depois é só republicar o `artifact.html` no mesmo link do Artifact.
   tela; a velocidade é multiplicada pela mesma escala, então o jogo corre igual
   no monitor e no celular deitado. Em pé, aparece o aviso para girar.
 - `?meta=300` na URL encurta a travessia (útil pra testar o final).
+
+## Publicar uma atualização
+
+O jogo está no ar em
+<https://kauedelvequio-eng.github.io/natural-na-academia/> pelo GitHub Pages,
+servido direto do `index.html` na raiz do branch `main`. Para atualizar:
+
+```bash
+git add -A && git commit -m "o que mudou" && git push
+```
+
+O Pages reconstrói sozinho em cerca de um minuto.
