@@ -948,7 +948,8 @@ function drawFundo(){
 
   // janelões com céu e nuvens (parallax lento)
   const off = (s * 0.14) % 320;
-  for (let x = -320 - off; x < W + 320; x += 320){
+  let jan = Math.floor(s * 0.14 / 320);   // número do janelão no mundo, não na tela
+  for (let x = -320 - off; x < W + 320; x += 320, jan++){
     ctx.fillStyle = "#e3c69c";
     ctx.fillRect(x + 16, 14, 276, 112);
     const cg = ctx.createLinearGradient(0, 20, 0, 120);
@@ -961,9 +962,9 @@ function drawFundo(){
     ctx.fillRect(x + 150, 21, 7, 98);
     ctx.fillRect(x + 23, 66, 262, 7);
     poster(x + 154, 70, 184);
-    // coração pintado na parede, entre um janelão e outro
+    // coração pintado na parede, num vão sim, noutro não
     // bate de leve: cresce um pixel no pico, sem tamanho quebrado
-    coracao(x + 314, 70, Math.sin(t * 6) > 0.6 ? 4 : 3, 1, true);
+    if (jan % 2 === 0) coracao(x + 314, 70, Math.sin(t * 6) > 0.6 ? 4 : 3, 1, true);
   }
 
   // sol entrando pela janela
@@ -995,8 +996,6 @@ function drawFundo(){
     }
     ctx.fillStyle = "#b99a72";
     ctx.fillRect(x + 150, ROAD_TOP - 14, 104, 4);
-    // coraçãozinho flutuando entre o vaso e os halteres
-    coracao(x + 106, ROAD_TOP - 48 + Math.sin(t * 3 + x * .01) * 4, 3, 1, true);
   }
 
   // placa pintada na parede
@@ -1043,8 +1042,6 @@ function drawFundo(){
       ctx.moveTo(x, y - 11); ctx.lineTo(x + 24, y); ctx.lineTo(x, y + 11);
       ctx.closePath(); ctx.fill();
     }
-    // corações clarinhos pintados no chão, nas raias do meio
-    for (const l of [1, 2]) coracao(x + 160 + l * 40, laneY(l), 4, .22);
   }
 
   // divisórias tracejadas
@@ -1063,11 +1060,11 @@ function drawFundo(){
   ctx.fillStyle = "#d3b78e"; ctx.fillRect(0, ROAD_BOT, W, 3);
   const tat = ["#bfe3c0", "#ffd9a8", "#cfd8f5", "#ffc9c0"];
   const off5 = (s * 1.15) % 150;
-  let n = 0;
+  let n = 0, tatMundo = Math.floor(s * 1.15 / 150);
   for (let x = -150 - off5; x < W + 150; x += 150, n++){
     ctx.fillStyle = tat[((n % tat.length) + tat.length) % tat.length];
     ctx.fillRect(x + 8, ROAD_BOT + 10, 134, H - ROAD_BOT - 18);
-    if (n % 2 === 0) coracao(x + 75, (ROAD_BOT + H) / 2 + 1, 3, .55);
+    if ((tatMundo + n) % 4 === 0) coracao(x + 75, (ROAD_BOT + H) / 2 + 1, 3, .45);
   }
   ctx.globalAlpha = 1;
 }
