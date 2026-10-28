@@ -54,7 +54,7 @@ Depois é só republicar o `artifact.html` no mesmo link do Artifact.
 ## Publicar uma atualização
 
 O jogo está no ar em
-<https://kauedelvequio-eng.github.io/natural-na-academia/> pelo GitHub Pages,
+<https://vaidar-pt-eng.github.io/vaidar-pt/> pelo GitHub Pages,
 servido direto do `index.html` na raiz do branch `main`. Para atualizar:
 
 ```bash
