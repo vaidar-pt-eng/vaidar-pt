@@ -76,6 +76,7 @@
   .screen{overflow:auto}
   @keyframes fade{from{opacity:0}to{opacity:1}}
   .eyebrow{color:var(--red); font-size:10px; letter-spacing:.42em}
+  .eyebrow .pt{color:#d8232a; font-style:normal; font-size:13px; margin-right:2px}
   h1{margin:0; font-size:clamp(22px,4.4vw,40px); font-weight:500; letter-spacing:.08em; color:#2a1d12}
   h1 small{display:block; font-size:12px; letter-spacing:.3em; color:var(--dim); margin-top:10px}
   .lead{max-width:430px; margin:0; color:#6f5b45; font-size:12px; line-height:1.75}
@@ -177,7 +178,7 @@
 
   <!-- INÍCIO -->
   <div class="screen on" id="scr-start">
-    <div class="eyebrow">VAI DÁ PT</div>
+    <div class="eyebrow"><i class="pt">★</i> VAI DÁ PT</div>
     <h1>O shape precisa atravessar<small>SEM TOMAR NADA</small></h1>
     <p class="lead">Você jurou pra geral que é natural. A academia inteira discorda e já vem com o pote na mão.</p>
     <div class="legenda">
@@ -885,6 +886,20 @@ function nuvem(x, y, e){
   ctx.fill();
 }
 
+// estrela de cinco pontas, vermelhinha
+function estrelaVermelha(cx, cy, r){
+  ctx.beginPath();
+  for (let i = 0; i < 10; i++){
+    const ang = -Math.PI/2 + i * Math.PI/5;
+    const rr = i % 2 ? r * 0.44 : r;
+    const px = cx + Math.cos(ang) * rr, py = cy + Math.sin(ang) * rr;
+    if (i) ctx.lineTo(px, py); else ctx.moveTo(px, py);
+  }
+  ctx.closePath();
+  ctx.fillStyle = "#d8232a";
+  ctx.fill();
+}
+
 // adesivo colado no vidro, com borda branca de recorte
 function adesivo(sp, cx, cy, px){
   const w = sp.w * px, h = sp.h * px;
@@ -953,13 +968,14 @@ function drawFundo(){
   ctx.save();
   ctx.translate(W/2, 94);
   ctx.fillStyle = "#ffffff";
-  ctx.fillRect(-118, -24, 236, 48);
+  ctx.fillRect(-136, -24, 272, 48);
   ctx.strokeStyle = "#ff8b5e"; ctx.lineWidth = 4;
-  ctx.strokeRect(-118, -24, 236, 48);
+  ctx.strokeRect(-136, -24, 272, 48);
+  estrelaVermelha(-102, 1, 17);
   ctx.font = "700 26px ui-monospace, Consolas, monospace";
   ctx.textAlign = "center"; ctx.textBaseline = "middle";
   ctx.fillStyle = "#ff6b4a";
-  ctx.fillText("VAI DÁ PT", 0, 2);
+  ctx.fillText("VAI DÁ PT", 18, 2);
   ctx.restore();
 
   // rodapé da parede
@@ -1053,21 +1069,32 @@ function drawJogador(){
   sombra(PLAYER_X, g.y + 10, 40, .4);
   if (!piscando) draw(sp, x, y, px);
 
-  plaquinha("NATURAL", PLAYER_X, y - 22, "#7e2f45");
+  plaquinha("JÉSCA", PLAYER_X, y - 32, "#7e2f45", "NATURAL");
 }
 
-// etiqueta com nome, por cima do personagem
-function plaquinha(texto, cx, topo, cor){
+// etiqueta com nome (e um segundo verso opcional) por cima do personagem
+function plaquinha(texto, cx, topo, cor, sub){
   ctx.save();
-  ctx.font = "700 11px ui-monospace, Consolas, monospace";
   ctx.textAlign = "center"; ctx.textBaseline = "middle";
-  const tw = ctx.measureText(texto).width + 16;
+  ctx.font = "700 12px ui-monospace, Consolas, monospace";
+  let larg = ctx.measureText(texto).width;
+  if (sub){
+    ctx.font = "700 9px ui-monospace, Consolas, monospace";
+    larg = Math.max(larg, ctx.measureText(sub).width);
+  }
+  const tw = larg + 20, th = sub ? 30 : 19;
   ctx.fillStyle = "#fffaf0ee";
-  ctx.fillRect(cx - tw/2, topo, tw, 18);
+  ctx.fillRect(cx - tw/2, topo, tw, th);
   ctx.strokeStyle = cor; ctx.lineWidth = 2;
-  ctx.strokeRect(cx - tw/2 + 1, topo + 1, tw - 2, 16);
+  ctx.strokeRect(cx - tw/2 + 1, topo + 1, tw - 2, th - 2);
   ctx.fillStyle = cor;
-  ctx.fillText(texto, cx, topo + 10);
+  ctx.font = "700 12px ui-monospace, Consolas, monospace";
+  ctx.fillText(texto, cx, topo + (sub ? 11 : 10));
+  if (sub){
+    ctx.font = "700 9px ui-monospace, Consolas, monospace";
+    ctx.globalAlpha = .75;
+    ctx.fillText(sub, cx, topo + 23);
+  }
   ctx.restore();
 }
 
