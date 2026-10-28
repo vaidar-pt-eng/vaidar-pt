@@ -418,6 +418,17 @@ const ESTRELA = sprite([
   ".oo.....oo.",
 ], { o:"#8a6410", y:"#ffd84d" });
 
+/* coraçãozinho que sobe da cabeça da Jésca */
+const CORACAO = sprite([
+  ".rr.rr.",
+  "rrbrrrr",
+  "rbrrrrr",
+  "rrrrrrr",
+  ".rrrrr.",
+  "..rrr..",
+  "...r...",
+], { r:"#ff5c8a", b:"#ffd3e0" });
+
 /* a presidenta aparece quando junta 3 estrelas e segura os potes */
 const DILMA = sprite([
   ".....oooooooo.....",
@@ -544,6 +555,8 @@ function novoJogo(){
     obst: [],
     itens: [],
     parts: [],
+    coracoes: [],
+    corT: 0.6,          // próximo coraçãozinho
     spawnT: 0.8,
     itemT: 3.2,
     portao: null,       // portão de saída
@@ -687,6 +700,17 @@ function spawnItem(){
   game.itens.push({ tipo, sp, px, x: W + 40, lane, y: laneY(lane), w: sp.w*px, h: sp.h*px, oy: 12, bob: Math.random()*6 });
 }
 
+function soltarCoracao(x, y){
+  game.coracoes.push({
+    x, y,
+    vy: -(38 + Math.random()*26),
+    fase: Math.random()*6,
+    px: Math.random() < 0.3 ? 3 : 2,
+    vida: 1.4 + Math.random()*0.6,
+    t: 0,
+  });
+}
+
 function particulas(x, y, cor, n){
   for (let i = 0; i < n; i++){
     game.parts.push({
@@ -814,6 +838,7 @@ function atualizar(dt){
         particulas(it.x, it.y-20, "#ffd84d", 16);
         if (g.estrelas >= 3){
           g.estrelas = 0; g.escudo = 9; g.aviso = 1.8;
+          for (let k = 0; k < 9; k++) soltarCoracao(PLAYER_X + (Math.random()-.5)*60, g.y - 70 - Math.random()*30);
           SFX.life();
         } else SFX.pick();
       } else {
@@ -829,6 +854,20 @@ function atualizar(dt){
     p.t += dt;
     if (p.t >= p.vida){ g.parts.splice(i,1); continue; }
     p.x += p.vx * dt; p.y += p.vy * dt; p.vy += 220 * dt;
+  }
+
+  // coraçõezinhos: de vez em quando, e bem mais com a Dilma por perto
+  g.corT -= dt;
+  if (g.corT <= 0){
+    soltarCoracao(PLAYER_X + (Math.random()-.5)*24, g.y - 78);
+    g.corT = g.escudo > 0 ? 0.25 + Math.random()*0.2 : 1.1 + Math.random()*1.2;
+  }
+  for (let i = g.coracoes.length - 1; i >= 0; i--){
+    const c = g.coracoes[i];
+    c.t += dt;
+    if (c.t >= c.vida){ g.coracoes.splice(i,1); continue; }
+    c.y += c.vy * dt;
+    c.fase += dt * 4;
   }
 
   // portão
@@ -1129,6 +1168,13 @@ function drawCena(){
       ctx.fillStyle = "#cf2d3a";
       ctx.fillText("DILMA BOLADONA", W/2, 150);
       ctx.restore();
+    }
+
+    // coraçõezinhos balançando enquanto sobem
+    for (const c of g.coracoes){
+      const a = Math.min(1, c.t * 5, (c.vida - c.t) * 2);
+      const w = CORACAO.w * c.px;
+      draw(CORACAO, c.x + Math.sin(c.fase) * 7 - w/2, c.y, c.px, a);
     }
 
     // partículas
