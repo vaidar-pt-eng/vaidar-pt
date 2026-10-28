@@ -1,8 +1,9 @@
-# Natural na Academia
+# Vai dá PT
 
-Jogo de travessia no estilo do [cadeflavio.run](https://cadeflavio.run/), só que mais
-simples: o "natural" atravessa a academia trocando de raia pra não encostar em
-pote de whey, saco de creatina e lata de pré-treino.
+Jogo de travessia no estilo do [cadeflavio.run](https://cadeflavio.run/), só que
+mais simples: a personagem atravessa a academia desviando de pote de whey, saco
+de creatina e lata de pré-treino. Junte 3 estrelas e a Dilma entra na frente
+segurando os potes.
 
 ## Arquivos
 
@@ -45,7 +46,10 @@ Depois é só republicar o `artifact.html` no mesmo link do Artifact.
 - **Tela:** a altura lógica é fixa (540) e a largura acompanha a proporção da
   tela; a velocidade é multiplicada pela mesma escala, então o jogo corre igual
   no monitor e no celular deitado. Em pé, aparece o aviso para girar.
-- `?meta=300` na URL encurta a travessia (útil pra testar o final).
+- **Estrelas:** cada 3 estrelas chamam a Dilma por 9 segundos; enquanto ela
+  estiver na frente, todo pote que encostar é destruído e ainda vale 15 pontos.
+- Atalhos de teste na URL: `?meta=300` encurta a travessia e `?escudo=1` já
+  começa com a Dilma em campo.
 
 ## Publicar uma atualização
 

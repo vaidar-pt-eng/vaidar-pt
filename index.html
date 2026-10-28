@@ -3,18 +3,18 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Natural na Academia</title>
+<title>Vai dá PT</title>
 <style>
   :root{
-    color-scheme: dark;
-    --bg:#06070a;
-    --panel:#0d1016;
-    --line:#1f242e;
-    --txt:#d8dce4;
-    --dim:#7e8695;
-    --red:#d94a4a;
-    --green:#4ad98a;
-    --yellow:#e8c75a;
+    color-scheme: light;
+    --bg:#fdf1dd;
+    --panel:#fff8ec;
+    --line:#e3cba6;
+    --txt:#4a3726;
+    --dim:#977f63;
+    --red:#e2574c;
+    --green:#36a86b;
+    --yellow:#f0a93c;
     --mono: ui-monospace, "SFMono-Regular", "Cascadia Mono", Consolas, "Courier New", monospace;
   }
   *{box-sizing:border-box}
@@ -33,8 +33,8 @@
     width:min(100%, calc((100vh - 32px) * 16 / 9));
     max-width:1100px; aspect-ratio:16/9;
     border:1px solid var(--line); border-radius:6px; overflow:hidden;
-    box-shadow:0 20px 60px rgba(0,0,0,.6);
-    background:#06070a; touch-action:none;
+    box-shadow:0 14px 40px rgba(120,80,30,.18);
+    background:#fdf1dd; touch-action:none;
   }
   /* celular deitado: tela cheia, sem moldura */
   @media (max-height:540px){
@@ -48,61 +48,73 @@
     position:absolute; inset:0 0 auto 0; padding:10px 14px;
     display:flex; align-items:center; gap:14px;
     font-size:11px; letter-spacing:.14em; pointer-events:none;
-    background:linear-gradient(#000000cc, #00000000);
+    background:linear-gradient(#fff8ecee, #fff8ec00);
   }
-  #hearts{display:flex; gap:4px; min-width:92px}
-  .heart{width:15px;height:14px;display:block;color:var(--red);filter:drop-shadow(0 0 4px #d94a4a55)}
-  .heart.off{color:#3a3f49;opacity:.5;filter:none}
+  #esq{display:flex; flex-direction:column; gap:4px; min-width:92px}
+  #hearts{display:flex; gap:4px}
+  #estrelas{display:flex; gap:3px; font-size:12px; line-height:1; color:#dcc8aa}
+  #estrelas .on{color:#f0a93c; text-shadow:0 0 6px #f0a93caa}
+  .heart{width:15px;height:14px;display:block;color:var(--red);filter:drop-shadow(0 1px 1px #00000022)}
+  .heart.off{color:#d9c4a6;opacity:.75;filter:none}
   #progwrap{flex:1; display:flex; flex-direction:column; gap:5px; align-items:center}
-  #proglabels{display:flex; justify-content:space-between; width:100%; font-size:9px; color:var(--dim)}
-  #progbar{width:100%; height:3px; background:#ffffff1c; position:relative}
+  #proglabels{display:flex; justify-content:space-between; width:100%; font-size:9px; color:#8a7054}
+  #progbar{width:100%; height:3px; background:#00000018; position:relative}
   #progfill{position:absolute; inset:0 auto 0 0; width:0%; background:var(--yellow)}
-  #progdot{position:absolute; top:-3px; width:9px; height:9px; background:var(--yellow); left:0; transform:translateX(-50%); box-shadow:0 0 8px var(--yellow)}
+  #progdot{position:absolute; top:-3px; width:9px; height:9px; background:var(--yellow); left:0; transform:translateX(-50%); box-shadow:0 1px 3px #0003}
   #stats{min-width:92px; text-align:right; font-size:11px}
-  #stats b{color:#fff; font-weight:600}
-  #stats small{display:block; color:var(--dim); font-size:9px; letter-spacing:.1em}
+  #stats b{color:#2f2217; font-weight:600}
+  #stats small{display:block; color:#8a7054; font-size:9px; letter-spacing:.1em}
 
   /* ---------- telas ---------- */
   .screen{
     position:absolute; inset:0; display:none; flex-direction:column;
     align-items:center; justify-content:center; text-align:center;
-    gap:14px; padding:24px; background:rgba(4,5,8,.86); backdrop-filter:blur(2px);
+    gap:14px; padding:24px; background:rgba(255,248,236,.96); backdrop-filter:blur(3px);
     animation:fade .25s ease;
   }
   .screen.on{display:flex}
   .screen{overflow:auto}
   @keyframes fade{from{opacity:0}to{opacity:1}}
   .eyebrow{color:var(--red); font-size:10px; letter-spacing:.42em}
-  h1{margin:0; font-size:clamp(22px,4.4vw,40px); font-weight:400; letter-spacing:.08em}
+  h1{margin:0; font-size:clamp(22px,4.4vw,40px); font-weight:500; letter-spacing:.08em; color:#2a1d12}
   h1 small{display:block; font-size:12px; letter-spacing:.3em; color:var(--dim); margin-top:10px}
-  .lead{max-width:430px; margin:0; color:var(--dim); font-size:12px; line-height:1.75}
-  .legend{display:flex; flex-wrap:wrap; gap:4px 16px; justify-content:center; font-size:10px; color:var(--dim)}
-  .legend span{display:flex; align-items:center; gap:6px}
-  .dot{width:8px;height:8px;border-radius:1px;display:inline-block}
-  .keys{font-size:10px; color:#5d6473; letter-spacing:.16em}
+  .lead{max-width:430px; margin:0; color:#6f5b45; font-size:12px; line-height:1.75}
+  .legenda{display:flex; flex-direction:column; gap:7px; font-size:10px; color:var(--dim)}
+  .grupo{display:flex; flex-wrap:wrap; gap:6px 12px; align-items:center; justify-content:center}
+  .rot{font-size:9px; letter-spacing:.2em; padding:3px 7px; border:1px solid}
+  .rot.mau{color:var(--red); border-color:#5a2730}
+  .rot.bom{color:var(--green); border-color:#235c40}
+  .it{display:flex; align-items:center; gap:6px}
+  .it i{display:flex; align-items:flex-end; height:26px}
+  .it canvas{display:block; image-rendering:pixelated}
+  .pts{font-size:9px; letter-spacing:.1em}
+  .pts.mau{color:#a3626a}
+  b.bom{color:var(--green); font-weight:400}
+  .keys{font-size:10px; color:#9c8468; letter-spacing:.16em}
   .row{display:flex; gap:8px; align-items:center; flex-wrap:wrap; justify-content:center}
-  .lbl{font-size:10px; color:#5d6473; letter-spacing:.2em; margin-right:4px}
+  .lbl{font-size:10px; color:#9c8468; letter-spacing:.2em; margin-right:4px}
   button{
     font-family:var(--mono); font-size:11px; letter-spacing:.22em; color:var(--txt);
     background:transparent; border:1px solid var(--line); padding:9px 16px;
     cursor:pointer; transition:.15s;
   }
-  button:hover{border-color:#49515f; color:#fff}
-  button.sel{border-color:var(--yellow); color:var(--yellow)}
+  button{background:#fffaf0}
+  button:hover{border-color:#c9a271; color:#2f2217}
+  button.sel{border-color:var(--yellow); color:#b96d12; background:#ffeccd}
   button.primary{
-    border-color:#5a2730; background:#2a1116; color:#f0d6d6; padding:13px 34px; margin-top:4px;
+    border-color:#e08b3a; background:#ffd79a; color:#6b3c0d; padding:13px 34px; margin-top:4px;
   }
-  button.primary:hover{background:#3a151c; border-color:var(--red); color:#fff}
+  button.primary:hover{background:#ffc877; border-color:#c9731f; color:#4e2a06}
   .score{display:flex; gap:34px; justify-content:center; margin:2px 0}
   .score div{font-size:10px; color:var(--dim); letter-spacing:.16em}
-  .score b{display:block; font-size:26px; color:#fff; font-weight:400; letter-spacing:.04em; margin-top:6px}
-  .foot{font-size:9px; color:#444b58; letter-spacing:.2em}
+  .score b{display:block; font-size:26px; color:#2f2217; font-weight:400; letter-spacing:.04em; margin-top:6px}
+  .foot{font-size:9px; color:#b49a7c; letter-spacing:.2em}
 
   /* ---------- controles touch ---------- */
   #touch{position:absolute; inset:0; display:none}
   #touch .tz{position:absolute; left:0; right:0; height:50%; display:flex; align-items:center; justify-content:center}
   #touch .tz.up{top:0} #touch .tz.dn{bottom:0}
-  #touch .tz span{font-size:26px; color:#ffffff14}
+  #touch .tz span{font-size:26px; color:#00000012}
   #touch.on{display:block}
   @media (max-width:620px){
     #hud{font-size:9px; gap:8px; padding:8px 10px}
@@ -130,7 +142,7 @@
     flex-direction:column; align-items:center; justify-content:center; gap:18px;
     background:var(--bg); text-align:center; padding:24px;
   }
-  #gira .ico{font-size:52px; color:var(--yellow); animation:gira 2.2s ease-in-out infinite}
+  #gira .ico{font-size:52px; color:#e08b3a; animation:gira 2.2s ease-in-out infinite}
   @keyframes gira{0%,45%{transform:rotate(0)}55%,100%{transform:rotate(-90deg)}}
   #gira p{margin:0; font-size:13px; letter-spacing:.2em}
   #gira small{display:block; margin-top:10px; font-size:10px; color:var(--dim); letter-spacing:.14em}
@@ -150,7 +162,10 @@
   <canvas id="game" width="960" height="540"></canvas>
 
   <div id="hud">
-    <div id="hearts"></div>
+    <div id="esq">
+      <div id="hearts"></div>
+      <div id="estrelas"><span>★</span><span>★</span><span>★</span></div>
+    </div>
     <div id="progwrap">
       <div id="proglabels"><span>ACADEMIA</span><span id="progmid">SAÍDA</span></div>
       <div id="progbar"><div id="progfill"></div><div id="progdot"></div></div>
@@ -162,15 +177,23 @@
 
   <!-- INÍCIO -->
   <div class="screen on" id="scr-start">
-    <div class="eyebrow">OPERAÇÃO NATURAL</div>
-    <h1>O shape precisa atravessar<small>SEM SUPLEMENTO NENHUM</small></h1>
-    <p class="lead">Atravesse a academia até a saída sem encostar em creatina, whey ou pré-treino. Todo mundo quer te fazer tomar.</p>
-    <div class="legend">
-      <span><i class="dot" style="background:#15161a;outline:1px solid #f4f4f4"></i>creatina</span>
-      <span><i class="dot" style="background:#2b6fd6"></i>whey</span>
-      <span><i class="dot" style="background:#7a3cd6"></i>pré-treino</span>
-      <span><i class="dot" style="background:#b5652e"></i>frango +50</span>
-      <span><i class="dot" style="background:#e8c75a"></i>banana +1 vida</span>
+    <div class="eyebrow">VAI DÁ PT</div>
+    <h1>O shape precisa atravessar<small>SEM TOMAR NADA</small></h1>
+    <p class="lead">Você jurou pra geral que é natural. A academia inteira discorda e já vem com o pote na mão.</p>
+    <div class="legenda">
+      <div class="grupo">
+        <span class="rot mau">DESVIA</span>
+        <span class="it"><i data-sp="creatina"></i>creatina</span>
+        <span class="it"><i data-sp="whey"></i>whey</span>
+        <span class="it"><i data-sp="pretreino"></i>pré-treino</span>
+        <span class="pts mau">cada um tira 1 vida</span>
+      </div>
+      <div class="grupo">
+        <span class="rot bom">PEGA</span>
+        <span class="it"><i data-sp="frango"></i>frango <b class="bom">+50 pontos</b></span>
+        <span class="it"><i data-sp="banana"></i>banana <b class="bom">+1 vida</b></span>
+        <span class="it"><i data-sp="estrela"></i>estrela <b class="bom">3 chamam a Dilma boladona</b></span>
+      </div>
     </div>
     <div class="keys">toque e arraste para mover • ou ↑ ↓ / W S • → corre • ← segura • P pausa • M silencia</div>
     <div class="row">
@@ -186,7 +209,7 @@
   <!-- FIM -->
   <div class="screen" id="scr-end">
     <div class="eyebrow" id="end-eyebrow">FIM DE JOGO</div>
-    <h1 id="end-title">Você tomou creatina</h1>
+    <h1 id="end-title">Deu PT</h1>
     <p class="lead" id="end-sub"></p>
     <div class="score">
       <div>PONTOS<b id="end-pts">0</b></div>
@@ -199,7 +222,7 @@
 
   <!-- PAUSA -->
   <div class="screen" id="scr-pause">
-    <div class="eyebrow">DESCANSO ENTRE SÉRIES</div>
+    <div class="eyebrow">DESCANSO DE 3 MINUTOS QUE VIRA 20</div>
     <h1>Pausado</h1>
     <button class="primary" id="btn-resume">VOLTAR</button>
   </div>
@@ -215,7 +238,7 @@
 let W = 960;              // largura lógica (acompanha o formato da tela)
 let ESC = 1;              // escala de velocidade em relação ao desenho base
 const H = 540;
-const ROAD_TOP = 200, ROAD_BOT = 472;
+const ROAD_TOP = 168, ROAD_BOT = 500;
 const LANES = 4;
 const LANE_H = (ROAD_BOT - ROAD_TOP) / LANES;
 const laneY = i => ROAD_TOP + LANE_H * (i + 0.5);
@@ -254,54 +277,55 @@ addEventListener("orientationchange", () => setTimeout(fitCanvas, 120));
    ==================================================================== */
 function sprite(rows, pal){ return { rows, pal, w: rows[0].length, h: rows.length }; }
 
-function draw(sp, x, y, px, alpha){
-  if (alpha !== undefined) ctx.globalAlpha = alpha;
+function draw(sp, x, y, px, alpha, cx){
+  const c2 = cx || ctx;
+  if (alpha !== undefined) c2.globalAlpha = alpha;
   for (let r = 0; r < sp.rows.length; r++){
     const row = sp.rows[r];
     for (let c = 0; c < row.length; c++){
       const ch = row[c];
       if (ch === ".") continue;
-      ctx.fillStyle = sp.pal[ch];
-      ctx.fillRect(Math.round(x + c*px), Math.round(y + r*px), px, px);
+      c2.fillStyle = sp.pal[ch];
+      c2.fillRect(Math.round(x + c*px), Math.round(y + r*px), px, px);
     }
   }
-  if (alpha !== undefined) ctx.globalAlpha = 1;
+  if (alpha !== undefined) c2.globalAlpha = 1;
 }
 
-const PAL_P = { h:"#2e2119", s:"#e8b48a", e:"#14161b", m:"#a9553f", t:"#eceff3", p:"#2f5fa8", l:"#e8b48a", c:"#d94a4a" };
+const PAL_P = { h:"#7e2f45", H:"#a44a62", s:"#eab98f", e:"#2a2320", m:"#b4654a", t:"#3a4f8a", p:"#2f3a4a", l:"#eab98f", c:"#ff6b5e" };
 const PLAYER_A = sprite([
   "...hhhhhh...",
-  "..hhhhhhhh..",
+  "..hhHHHHhh..",
+  ".hhHhhhhHhh.",
+  ".hhsssssshh.",
+  ".hhsesseshh.",
+  ".hhssmmsshh.",
   "..hssssssh..",
-  "..hsessesh..",
-  "..hssmmssh..",
-  "...ssssss...",
-  ".....ss.....",
+  "..Hh.ss.hH..",
   "..stttttts..",
   "..stttttts..",
   "..stttttts..",
   "...tttttt...",
   "...pppppp...",
   "...pp..pp...",
-  "...ll..ll...",
   "...ll..ll...",
   "..ccc..ccc..",
 ], PAL_P);
 const PLAYER_B = sprite([
   "...hhhhhh...",
-  "..hhhhhhhh..",
+  "..hhHHHHhh..",
+  ".hhHhhhhHhh.",
+  ".hhsssssshh.",
+  ".hhsesseshh.",
+  ".hhssmmsshh.",
   "..hssssssh..",
-  "..hsessesh..",
-  "..hssmmssh..",
-  "...ssssss...",
-  ".....ss.....",
+  "..Hh.ss.hH..",
   "..stttttts..",
   "..stttttts..",
   "..stttttts..",
   "...tttttt...",
   "...pppppp...",
-  "...pp..pp...",
-  "...ll..ll...",
+  "..pp....pp..",
   "..ll....ll..",
   ".ccc....ccc.",
 ], PAL_P);
@@ -381,14 +405,48 @@ const BANANA = sprite([
   "...oo.......",
 ], { o:"#6b5410", y:"#e8c75a" });
 
+const ESTRELA = sprite([
+  "....ooo....",
+  "...oyyyo...",
+  "...oyyyo...",
+  "oooyyyyyooo",
+  "oyyyyyyyyyo",
+  ".oyyyyyyyo.",
+  "..oyyyyyo..",
+  ".oyyo.oyyo.",
+  ".oo.....oo.",
+], { o:"#8a6410", y:"#ffd84d" });
+
+/* a presidenta aparece quando junta 3 estrelas e segura os potes */
+const DILMA = sprite([
+  "...oooooooo...",
+  "..ohhhhhhhho..",
+  ".ohhhhhhhhhho.",
+  ".ohhsssssshho.",
+  ".ohsessssesho.",
+  ".ohsssmmsssho.",
+  ".ohhsssssshho.",
+  "..ohh.ss.hho..",
+  ".orrrrrrrrrro.",
+  "sorygrrrrrrros",
+  "sorrygrrrrrros",
+  ".orrrygrrrrro.",
+  ".orrrrygrrrro.",
+  ".orrrrrygrrro.",
+  "..orrrrrrrro..",
+  "...oll..llo...",
+  "...oll..llo...",
+  "..occc..ccco..",
+], { o:"#2f2a2a", h:"#6a4634", s:"#ecc5a4", e:"#2a2320", m:"#a9553f", r:"#cf2d3a", y:"#f5d327", g:"#1c9e4a", l:"#ecc5a4", c:"#2f3a4a" });
+
 /* tipos de obstáculo: sprite, escala, velocidade extra em relação ao chão */
 const TIPOS = {
-  creatina:  { sp:CREATINA,  px:4, extra:  0, zig:false, nome:"uma creatina",
-               rot:{ txt:"CREATINA", cx:9, cy:5.5, w:14, tam:12, cor:"#15161a" } },
-  whey:      { sp:WHEY,      px:4, extra:-35, zig:false, nome:"um pote de whey",
-               rot:{ txt:"WHEY",     cx:8, cy:6.5, w:12, tam:15, cor:"#1b3f7a" } },
-  pretreino: { sp:PRETREINO, px:4, extra:120, zig:true,  nome:"um pré-treino",
-               rot:{ txt:"PRÉ",      cx:6, cy:5.5, w:8,  tam:12, cor:"#0e3b2a" } },
+  creatina:  { sp:CREATINA,  px:5, extra:  0, zig:false, nome:"uma creatina", fim:"Creatina na cara. Em três dias você tá inchado jurando que é massa magra.",
+               rot:{ txt:"CREATINA", cx:9, cy:5.5, w:14, tam:15, cor:"#15161a" } },
+  whey:      { sp:WHEY,      px:5, extra:-35, zig:false, nome:"um pote de whey", fim:"Pote de whey em cheio. Amanhã já tem foto do shaker no story.",
+               rot:{ txt:"WHEY",     cx:8, cy:6.5, w:12, tam:19, cor:"#1b3f7a" } },
+  pretreino: { sp:PRETREINO, px:5, extra:120, zig:true,  nome:"um pré-treino", fim:"O pré-treino te pegou. Boa sorte pra dormir hoje.",
+               rot:{ txt:"PRÉ",      cx:6, cy:5.5, w:8,  tam:15, cor:"#0e3b2a" } },
 };
 
 // escreve o nome do suplemento na faixa do rótulo, condensando se não couber
@@ -458,8 +516,9 @@ let cfg = DIF[dif];
 let game = null;
 function novoJogo(){
   cfg = DIF[dif];
-  // ?meta=300 encurta a travessia (útil pra testar o final)
-  const metaURL = parseInt(new URLSearchParams(location.search).get("meta"), 10);
+  // atalhos de teste: ?meta=300 encurta a travessia, ?escudo=1 ja comeca com a Dilma
+  const q = new URLSearchParams(location.search);
+  const metaURL = parseInt(q.get("meta"), 10);
   game = {
     meta: metaURL > 0 ? metaURL : cfg.meta,
     t: 0,
@@ -470,6 +529,9 @@ function novoJogo(){
     pontos: 0,
     bonus: 0,
     frangos: 0,
+    estrelas: 0,          // 3 chamam a Dilma
+    escudo: q.has("escudo") ? 30 : 0,   // segundos de proteção restantes
+    aviso: 0,             // tempo do aviso na tela
     lane: 1,
     laneAlvo: 1,
     y: laneY(1),
@@ -615,11 +677,13 @@ function spawnOnda(){
 
 function spawnItem(){
   const lane = (Math.random()*LANES)|0;
-  const vidaBaixa = game.vidas < game.maxVidas;
-  const tipo = (vidaBaixa && Math.random() < 0.28) ? "banana" : "frango";
-  const sp = tipo === "banana" ? BANANA : FRANGO;
-  const px = 4;
-  game.itens.push({ tipo, sp, px, x: W + 40, lane, y: laneY(lane), w: sp.w*px, h: sp.h*px, oy: 10, bob: Math.random()*6 });
+  const pote = ["frango", "frango"];
+  if (game.vidas < game.maxVidas) pote.push("banana");
+  if (game.escudo <= 0) pote.push("estrela", "estrela");
+  const tipo = pote[(Math.random()*pote.length)|0];
+  const sp = tipo === "banana" ? BANANA : tipo === "estrela" ? ESTRELA : FRANGO;
+  const px = 5;
+  game.itens.push({ tipo, sp, px, x: W + 40, lane, y: laneY(lane), w: sp.w*px, h: sp.h*px, oy: 12, bob: Math.random()*6 });
 }
 
 function particulas(x, y, cor, n){
@@ -638,7 +702,7 @@ function particulas(x, y, cor, n){
 // fx/fy encolhem a caixa em fração da largura/altura para o toque ser justo.
 function caixa(e, fx, fy){
   const px = e.w * fx, py = e.h * fy;
-  const oy = e.oy === undefined ? 18 : e.oy;
+  const oy = e.oy === undefined ? 22 : e.oy;
   return { x: e.x - e.w/2 + px, y: e.y - e.h + oy + py, w: e.w - px*2, h: e.h - py*2 };
 }
 function bateu(a, b){
@@ -652,7 +716,7 @@ function levarDano(obj){
   SFX.hit();
   const cor = obj.tipo === "creatina" ? "#f4f4f4" : obj.tipo === "whey" ? "#9fc2f2" : "#b58cf0";
   particulas(obj.x, obj.y - 20, cor, 26);
-  if (game.vidas <= 0) fim(false, obj.t.nome);
+  if (game.vidas <= 0) fim(false, obj.t.fim);
 }
 
 function fim(venceu, motivo){
@@ -678,6 +742,8 @@ function atualizar(dt){
   g.lane = Math.max(0, Math.min(LANES-1, Math.round((g.y - ROAD_TOP) / LANE_H - 0.5)));
 
   if (g.inv > 0) g.inv -= dt;
+  if (g.escudo > 0) g.escudo -= dt;
+  if (g.aviso > 0) g.aviso -= dt;
   if (g.shake > 0) g.shake = Math.max(0, g.shake - dt * 42);
 
   // chegou na meta -> entra o portão da saída
@@ -698,7 +764,8 @@ function atualizar(dt){
     if (g.itemT <= 0){ spawnItem(); g.itemT = 3.6 + Math.random()*3.4; }
   }
 
-  const pBox = { x: PLAYER_X - 16, y: g.y - 44, w: 32, h: 54 };
+  const pBox = { x: PLAYER_X - 18, y: g.y - 52, w: 36, h: 64 };
+  if (g.escudo > 0) pBox.w += 74;   // a Dilma segura o que vem pela frente
 
   // obstáculos
   for (let i = g.obst.length - 1; i >= 0; i--){
@@ -714,10 +781,19 @@ function atualizar(dt){
       o.y += (laneY(o.lane) - o.y) * Math.min(1, dt*8);
     }
     if (o.x < -90){ g.obst.splice(i,1); g.bonus += 2; continue; }
-    if (g.inv <= 0 && bateu(pBox, caixa(o, .18, .16))){
-      g.obst.splice(i,1);
-      levarDano(o);
-      if (g.acabou) return;
+    if (bateu(pBox, caixa(o, .18, .16))){
+      if (g.escudo > 0){                       // barrado pela presidenta
+        g.obst.splice(i,1);
+        g.bonus += 15;
+        particulas(o.x - 10, o.y - 22, "#ffd84d", 18);
+        SFX.lane();
+        continue;
+      }
+      if (g.inv <= 0){
+        g.obst.splice(i,1);
+        levarDano(o);
+        if (g.acabou) return;
+      }
     }
   }
 
@@ -732,6 +808,13 @@ function atualizar(dt){
       if (it.tipo === "banana"){
         game.vidas = Math.min(game.maxVidas, game.vidas + 1);
         SFX.life(); particulas(it.x, it.y-20, "#e8c75a", 16);
+      } else if (it.tipo === "estrela"){
+        g.estrelas++;
+        particulas(it.x, it.y-20, "#ffd84d", 16);
+        if (g.estrelas >= 3){
+          g.estrelas = 0; g.escudo = 9; g.aviso = 1.8;
+          SFX.life();
+        } else SFX.pick();
       } else {
         game.frangos++; game.pontos += 50;
         SFX.pick(); particulas(it.x, it.y-20, "#e6b07a", 14);
@@ -760,94 +843,142 @@ function atualizar(dt){
 /* ====================================================================
    7. DESENHO
    ==================================================================== */
+function nuvem(x, y, e){
+  ctx.fillStyle = "#ffffff";
+  ctx.beginPath();
+  ctx.arc(x, y, 11*e, 0, 7);
+  ctx.arc(x + 13*e, y + 3*e, 8*e, 0, 7);
+  ctx.arc(x - 12*e, y + 4*e, 7*e, 0, 7);
+  ctx.fill();
+}
+
 function drawFundo(){
-  const g = game, s = g ? g.scroll : 0;
+  const g = game, s = g ? g.scroll : 0, t = g ? g.t : 0;
 
-  // parede do fundo
-  const grad = ctx.createLinearGradient(0,0,0,ROAD_TOP);
-  grad.addColorStop(0,"#080a0e"); grad.addColorStop(1,"#141922");
-  ctx.fillStyle = grad; ctx.fillRect(0,0,W,ROAD_TOP);
+  // parede clara
+  ctx.fillStyle = "#fcead2";
+  ctx.fillRect(0, 0, W, ROAD_TOP);
 
-  // espelhos (parallax lento)
-  const off = (s * 0.18) % 170;
-  for (let x = -170 - off; x < W + 170; x += 170){
-    ctx.fillStyle = "#121722";
-    ctx.fillRect(x+8, 44, 154, ROAD_TOP-58);
-    const gg = ctx.createLinearGradient(x+8,44,x+162,ROAD_TOP);
-    gg.addColorStop(0,"#1b2433"); gg.addColorStop(.5,"#10151e"); gg.addColorStop(1,"#1a2130");
-    ctx.fillStyle = gg; ctx.fillRect(x+10, 46, 150, ROAD_TOP-62);
-    ctx.fillStyle = "#ffffff0d";
-    ctx.fillRect(x+22, 54, 10, ROAD_TOP-76);
-    ctx.fillStyle = "#0b0e14";
-    ctx.fillRect(x+162, 44, 8, ROAD_TOP-58);
+  // janelões com céu e nuvens (parallax lento)
+  const off = (s * 0.14) % 320;
+  for (let x = -320 - off; x < W + 320; x += 320){
+    ctx.fillStyle = "#e3c69c";
+    ctx.fillRect(x + 16, 14, 276, 112);
+    const cg = ctx.createLinearGradient(0, 20, 0, 120);
+    cg.addColorStop(0, "#8fd3f4"); cg.addColorStop(1, "#dcf3ff");
+    ctx.fillStyle = cg;
+    ctx.fillRect(x + 23, 21, 262, 98);
+    nuvem(x + 72, 50, 1);
+    nuvem(x + 205, 84, .7);
+    ctx.fillStyle = "#e3c69c";
+    ctx.fillRect(x + 150, 21, 7, 98);
+    ctx.fillRect(x + 23, 66, 262, 7);
   }
 
-  // equipamentos (silhuetas, parallax médio)
-  const off2 = (s * 0.45) % 240;
-  ctx.fillStyle = "#0a0d13";
-  for (let x = -240 - off2; x < W + 240; x += 240){
-    ctx.fillRect(x+20, 150, 80, 48);            // rack
-    ctx.fillRect(x+16, 142, 88, 8);
-    ctx.fillRect(x+130, 170, 56, 28);           // banco
-    ctx.fillRect(x+152, 160, 12, 12);
-    for (let d = 0; d < 3; d++){ ctx.fillRect(x+26 + d*26, 158, 20, 10); }
+  // sol entrando pela janela
+  const sx = W * 0.8, sy = 44;
+  const gl = ctx.createRadialGradient(sx, sy, 8, sx, sy, 130);
+  gl.addColorStop(0, "#fff8d2"); gl.addColorStop(.4, "#ffe79a66"); gl.addColorStop(1, "#ffe79a00");
+  ctx.fillStyle = gl;
+  ctx.beginPath(); ctx.arc(sx, sy, 130, 0, 7); ctx.fill();
+  ctx.fillStyle = "#ffdd57";
+  ctx.beginPath(); ctx.arc(sx, sy, 24, 0, 7); ctx.fill();
+
+  // plantinhas e halteres coloridos encostados na parede
+  const off2 = (s * 0.45) % 270;
+  const cores = ["#ff6b5e", "#4aa3e8", "#f0a93c", "#5fc27e"];
+  for (let x = -270 - off2; x < W + 270; x += 270){
+    // vaso
+    ctx.fillStyle = "#4fb06a";
+    ctx.beginPath(); ctx.arc(x + 44, ROAD_TOP - 54, 17, 0, 7);
+    ctx.arc(x + 28, ROAD_TOP - 42, 13, 0, 7);
+    ctx.arc(x + 60, ROAD_TOP - 42, 13, 0, 7); ctx.fill();
+    ctx.fillStyle = "#d98050";
+    ctx.fillRect(x + 32, ROAD_TOP - 34, 26, 22);
+    // rack de halteres
+    ctx.fillStyle = "#cbb08a";
+    ctx.fillRect(x + 150, ROAD_TOP - 42, 104, 30);
+    for (let d = 0; d < 3; d++){
+      ctx.fillStyle = cores[(d + (x|0)) % cores.length];
+      ctx.fillRect(x + 158 + d*32, ROAD_TOP - 54, 24, 11);
+    }
+    ctx.fillStyle = "#b99a72";
+    ctx.fillRect(x + 150, ROAD_TOP - 14, 104, 4);
   }
 
-  // letreiro neon
-  const fl = 0.82 + Math.sin((g?g.t:0) * 9) * 0.06 + Math.sin((g?g.t:0)*2.3)*0.1;
+  // placa pintada na parede
   ctx.save();
-  ctx.globalAlpha = Math.max(.35, fl);
-  ctx.font = "600 26px ui-monospace, Consolas, monospace";
-  ctx.textAlign = "center";
-  ctx.shadowColor = "#d94a4a"; ctx.shadowBlur = 22;
-  ctx.fillStyle = "#ff7b7b";
-  ctx.fillText("A C A D E M I A   2 4 h", W/2, 118);
+  ctx.translate(W/2, 94);
+  ctx.fillStyle = "#ffffff";
+  ctx.fillRect(-118, -24, 236, 48);
+  ctx.strokeStyle = "#ff8b5e"; ctx.lineWidth = 4;
+  ctx.strokeRect(-118, -24, 236, 48);
+  ctx.font = "700 26px ui-monospace, Consolas, monospace";
+  ctx.textAlign = "center"; ctx.textBaseline = "middle";
+  ctx.fillStyle = "#ff6b4a";
+  ctx.fillText("VAI DÁ PT", 0, 2);
   ctx.restore();
 
-  // borda superior do piso
-  ctx.fillStyle = "#1c222c"; ctx.fillRect(0, ROAD_TOP-16, W, 16);
-  ctx.fillStyle = "#283040"; ctx.fillRect(0, ROAD_TOP-16, W, 3);
+  // rodapé da parede
+  ctx.fillStyle = "#e8d0ac"; ctx.fillRect(0, ROAD_TOP - 14, W, 14);
+  ctx.fillStyle = "#d3b78e"; ctx.fillRect(0, ROAD_TOP - 14, W, 3);
 
-  // piso
-  const fg = ctx.createLinearGradient(0,ROAD_TOP,0,ROAD_BOT);
-  fg.addColorStop(0,"#262b34"); fg.addColorStop(.5,"#1e222a"); fg.addColorStop(1,"#171a21");
-  ctx.fillStyle = fg; ctx.fillRect(0, ROAD_TOP, W, ROAD_BOT-ROAD_TOP);
+  // piso em faixas claras
+  for (let i = 0; i < LANES; i++){
+    ctx.fillStyle = i % 2 ? "#f3ddb6" : "#f9e8ca";
+    ctx.fillRect(0, ROAD_TOP + LANE_H * i, W, LANE_H + 1);
+  }
+
+  // manchas de sol atravessando o piso
+  const off3 = s % 460;
+  ctx.fillStyle = "#fff8dc99";
+  for (let x = -460 - off3; x < W + 460; x += 460){
+    ctx.beginPath();
+    ctx.moveTo(x, ROAD_TOP); ctx.lineTo(x + 130, ROAD_TOP);
+    ctx.lineTo(x + 58, ROAD_BOT); ctx.lineTo(x - 72, ROAD_BOT);
+    ctx.closePath(); ctx.fill();
+  }
 
   // setas no chão
-  const off3 = (s * 1) % 300;
-  ctx.fillStyle = "#ffffff0a";
-  for (let x = -300 - off3; x < W+300; x += 300){
+  const off4 = s % 320;
+  ctx.fillStyle = "#e0954a2e";
+  for (let x = -320 - off4; x < W + 320; x += 320){
     for (const l of [0, 3]){
       const y = laneY(l);
       ctx.beginPath();
-      ctx.moveTo(x, y-10); ctx.lineTo(x+22, y); ctx.lineTo(x, y+10); ctx.closePath(); ctx.fill();
+      ctx.moveTo(x, y - 11); ctx.lineTo(x + 24, y); ctx.lineTo(x, y + 11);
+      ctx.closePath(); ctx.fill();
     }
   }
 
   // divisórias tracejadas
   ctx.save();
-  ctx.strokeStyle = "#d8b24a66"; ctx.lineWidth = 3;
-  ctx.setLineDash([46, 34]);
-  ctx.lineDashOffset = -(s % 80);
+  ctx.strokeStyle = "#ffffffdd"; ctx.lineWidth = 4;
+  ctx.setLineDash([52, 38]);
+  ctx.lineDashOffset = -(s % 90);
   for (let i = 1; i < LANES; i++){
     const y = ROAD_TOP + LANE_H * i;
     ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke();
   }
   ctx.restore();
 
-  // borda inferior / tatame
-  ctx.fillStyle = "#1c222c"; ctx.fillRect(0, ROAD_BOT, W, H-ROAD_BOT);
-  ctx.fillStyle = "#283040"; ctx.fillRect(0, ROAD_BOT, W, 3);
-  const off4 = (s * 1.15) % 120;
-  ctx.fillStyle = "#151a22";
-  for (let x = -120 - off4; x < W+120; x += 120) ctx.fillRect(x+6, ROAD_BOT+12, 108, 44);
+  // tatames coloridos na beirada de baixo
+  ctx.fillStyle = "#ecd5b0"; ctx.fillRect(0, ROAD_BOT, W, H - ROAD_BOT);
+  ctx.fillStyle = "#d3b78e"; ctx.fillRect(0, ROAD_BOT, W, 3);
+  const tat = ["#bfe3c0", "#ffd9a8", "#cfd8f5", "#ffc9c0"];
+  const off5 = (s * 1.15) % 150;
+  let n = 0;
+  for (let x = -150 - off5; x < W + 150; x += 150, n++){
+    ctx.fillStyle = tat[((n % tat.length) + tat.length) % tat.length];
+    ctx.fillRect(x + 8, ROAD_BOT + 10, 134, H - ROAD_BOT - 18);
+  }
 }
 
 function sombra(x, y, w, a){
   ctx.save();
-  ctx.globalAlpha = a === undefined ? .35 : a;
-  ctx.fillStyle = "#000";
-  ctx.beginPath(); ctx.ellipse(x, y+6, w/2, w/6, 0, 0, Math.PI*2); ctx.fill();
+  ctx.globalAlpha = a === undefined ? .16 : a;
+  ctx.fillStyle = "#7a5325";
+  ctx.beginPath(); ctx.ellipse(x, y + 6, w/2, w/6, 0, 0, Math.PI*2); ctx.fill();
   ctx.restore();
 }
 
@@ -871,26 +1002,47 @@ function drawPortao(){
 function drawJogador(){
   const g = game;
   const piscando = g.inv > 0 && Math.floor(g.t * 14) % 2 === 0;
-  const px = 4;
+  const px = 5;
   const sp = (Math.floor(g.scroll / 26) % 2 === 0) ? PLAYER_A : PLAYER_B;
   const w = sp.w * px, h = sp.h * px;
   const x = PLAYER_X - w/2;
-  const y = g.y - h + 18;
+  const y = g.y - h + 22;
   sombra(PLAYER_X, g.y + 10, 40, .4);
   if (!piscando) draw(sp, x, y, px);
 
-  // plaquinha "NATURAL"
+  plaquinha("NATURAL", PLAYER_X, y - 22, "#7e2f45");
+}
+
+// etiqueta com nome, por cima do personagem
+function plaquinha(texto, cx, topo, cor){
   ctx.save();
-  ctx.font = "600 10px ui-monospace, Consolas, monospace";
-  ctx.textAlign = "center";
-  const label = "NATURAL", tw = ctx.measureText(label).width + 14;
-  ctx.fillStyle = "#0b0e14dd";
-  ctx.fillRect(PLAYER_X - tw/2, y - 20, tw, 15);
-  ctx.strokeStyle = "#e8c75a55"; ctx.lineWidth = 1;
-  ctx.strokeRect(PLAYER_X - tw/2 + .5, y - 19.5, tw-1, 14);
-  ctx.fillStyle = "#e8c75a";
-  ctx.fillText(label, PLAYER_X, y - 9);
+  ctx.font = "700 11px ui-monospace, Consolas, monospace";
+  ctx.textAlign = "center"; ctx.textBaseline = "middle";
+  const tw = ctx.measureText(texto).width + 16;
+  ctx.fillStyle = "#fffaf0ee";
+  ctx.fillRect(cx - tw/2, topo, tw, 18);
+  ctx.strokeStyle = cor; ctx.lineWidth = 2;
+  ctx.strokeRect(cx - tw/2 + 1, topo + 1, tw - 2, 16);
+  ctx.fillStyle = cor;
+  ctx.fillText(texto, cx, topo + 10);
   ctx.restore();
+}
+
+// a presidenta entra na frente e segura os potes
+function drawDilma(){
+  const g = game, px = 5;
+  const w = DILMA.w * px, h = DILMA.h * px;
+  const cx = PLAYER_X + 52;
+  const bob = Math.sin(g.t * 7) * 3;
+  const y = g.y - h + 22 + bob;
+  const acabando = g.escudo < 2.2 && Math.floor(g.t * 9) % 2 === 0;
+  sombra(cx, g.y + 10, 52, .16);
+  if (acabando) return;
+  ctx.save();
+  ctx.shadowColor = "#ffd84d"; ctx.shadowBlur = 16;
+  draw(DILMA, cx - w/2, y, px);
+  ctx.restore();
+  plaquinha("DILMA BOLADONA", cx, y - 32, "#cf2d3a");
 }
 
 function drawCena(){
@@ -904,7 +1056,7 @@ function drawCena(){
   if (g){
     // obstáculos
     for (const o of g.obst){
-      const bx = o.x - o.w/2, by = o.y - o.h + 18;
+      const bx = o.x - o.w/2, by = o.y - o.h + 22;
       sombra(o.x, o.y + 10, o.w * .8);
       draw(o.t.sp, bx, by, o.t.px);
       if (o.t.rot) rotulo(o.t.rot, bx, by, o.t.px);
@@ -916,11 +1068,26 @@ function drawCena(){
       ctx.save();
       ctx.shadowColor = it.tipo === "banana" ? "#e8c75a" : "#e6b07a";
       ctx.shadowBlur = 12;
-      draw(it.sp, it.x - it.w/2, it.y - it.h + 10 + fy, it.px);
+      draw(it.sp, it.x - it.w/2, it.y - it.h + 12 + fy, it.px);
       ctx.restore();
     }
     drawPortao();
     drawJogador();
+    if (g.escudo > 0) drawDilma();
+
+    // aviso de que a Dilma chegou
+    if (g.aviso > 0){
+      const k = Math.min(1, (1.8 - g.aviso) * 6);
+      ctx.save();
+      ctx.globalAlpha = Math.min(1, g.aviso * 1.4);
+      ctx.textAlign = "center"; ctx.textBaseline = "middle";
+      ctx.font = "700 " + (26 + (1 - k) * 14) + "px ui-monospace, Consolas, monospace";
+      ctx.lineWidth = 6; ctx.strokeStyle = "#fffaf0";
+      ctx.strokeText("DILMA BOLADONA", W/2, 150);
+      ctx.fillStyle = "#cf2d3a";
+      ctx.fillText("DILMA BOLADONA", W/2, 150);
+      ctx.restore();
+    }
 
     // partículas
     for (const p of g.parts){
@@ -943,6 +1110,7 @@ function drawCena(){
    ==================================================================== */
 const el = id => document.getElementById(id);
 const hearts = el("hearts"), progfill = el("progfill"), progdot = el("progdot"), pts = el("pts");
+const estrelasEl = el("estrelas");
 
 function atualizarHUD(){
   const g = game; if (!g) return;
@@ -955,6 +1123,7 @@ function atualizarHUD(){
     }
   }
   [...hearts.children].forEach((h,i)=> h.classList.toggle("off", i >= g.vidas));
+  [...estrelasEl.children].forEach((e,i)=> e.classList.toggle("on", g.escudo > 0 || i < g.estrelas));
   const p = Math.min(100, g.dist / g.meta * 100);
   progfill.style.width = p + "%";
   progdot.style.left = p + "%";
@@ -977,15 +1146,21 @@ function telaInicio(){
 
 const cap = t => t.charAt(0).toUpperCase() + t.slice(1);
 
+const VITORIAS = [
+  "Atravessou a academia inteira sem encostar num pote. Agora é só dizer que o shape é genética.",
+  "Saiu natural e de cabeça erguida. O frango com batata doce te espera na marmita.",
+  "Zero suplemento. Seu segredo continua sendo arroz, frango e teimosia.",
+];
+
 function telaFim(){
   const g = game;
   const recorde = g.pontos > best();
   if (recorde) setBest(g.pontos);
   el("end-eyebrow").textContent = g.venceu ? "MISSÃO CUMPRIDA" : "FIM DE JOGO";
-  el("end-title").textContent = g.venceu ? "Você continua natural" : "Pegaram você";
-  el("end-sub").textContent = g.venceu
-    ? "Atravessou a academia inteira sem tocar em um pote sequer. Frango com batata doce te espera lá fora."
-    : cap(g.motivo) + " te acertou em cheio. Amanhã você volta." + (recorde ? " Mas que recorde, hein." : "");
+  el("end-title").textContent = g.venceu ? "Você continua natural" : "Deu PT";
+  el("end-sub").textContent = (g.venceu
+    ? VITORIAS[(Math.random()*VITORIAS.length)|0]
+    : g.motivo) + (recorde ? " E ainda bateu seu recorde, hein." : "");
   el("end-pts").textContent = g.pontos;
   el("end-m").textContent = Math.floor(g.dist);
   el("end-best").textContent = best();
@@ -1004,6 +1179,20 @@ function comecar(){
 function pausar(p){
   if (p && state === ST.PLAY){ state = ST.PAUSE; mostrar("scr-pause"); }
   else if (!p && state === ST.PAUSE){ state = ST.PLAY; mostrar(null); }
+}
+
+// desenha cada sprite da legenda num canvas pequeno
+const MINIS = { creatina:CREATINA, whey:WHEY, pretreino:PRETREINO, frango:FRANGO, banana:BANANA, estrela:ESTRELA };
+for (const alvo of document.querySelectorAll("[data-sp]")){
+  const sp = MINIS[alvo.dataset.sp];
+  if (!sp) continue;
+  const px = 2;
+  const cv = document.createElement("canvas");
+  cv.width = sp.w * px; cv.height = sp.h * px;
+  const c2 = cv.getContext("2d");
+  c2.imageSmoothingEnabled = false;
+  draw(sp, 0, 0, px, undefined, c2);
+  alvo.appendChild(cv);
 }
 
 // botões
