@@ -1273,7 +1273,7 @@ function telaFim(){
   const recorde = g.pontos > best();
   if (recorde) setBest(g.pontos);
   el("end-eyebrow").textContent = g.venceu ? "MISSÃO CUMPRIDA" : "FIM DE JOGO";
-  el("end-title").textContent = g.venceu ? "Você continua natural" : "Deu PT";
+  el("end-title").textContent = "Deu PT";
   el("end-sub").textContent = (g.venceu
     ? VITORIAS[(Math.random()*VITORIAS.length)|0]
     : g.motivo) + (recorde ? " E ainda bateu seu recorde, hein." : "");
