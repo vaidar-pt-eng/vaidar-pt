@@ -680,7 +680,7 @@ function spawnItem(){
   const lane = (Math.random()*LANES)|0;
   const pote = ["frango", "frango"];
   if (game.vidas < game.maxVidas) pote.push("banana");
-  if (game.escudo <= 0) pote.push("estrela", "estrela");
+  if (game.escudo <= 0) pote.push("estrela", "estrela", "estrela");
   const tipo = pote[(Math.random()*pote.length)|0];
   const sp = tipo === "banana" ? BANANA : tipo === "estrela" ? ESTRELA : FRANGO;
   const px = 5;
