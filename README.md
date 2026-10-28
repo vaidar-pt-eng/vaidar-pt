@@ -30,8 +30,11 @@ Depois é só republicar o `artifact.html` no mesmo link do Artifact.
 
 ## Como funciona
 
-- **Controles:** ↑ ↓ (ou W/S) trocam de raia, → corre mais rápido, ← segura,
-  P pausa, M silencia. No celular, toque na metade de cima ou de baixo da tela.
+- **Controles:** no celular, toque e arraste para mover o personagem
+  livremente entre as raias; arrastar para os lados acelera ou segura.
+  Toque curto tambem troca de raia. No teclado: ↑ ↓ (ou W/S) trocam de
+  raia, → corre, ← segura, P pausa, M silencia. O personagem sempre
+  corre sozinho para frente.
 - **Inimigos:** creatina (segue o chão), whey (vem mais devagar, então você
   alcança) e pré-treino (mais rápido e muda de raia sozinho, a partir de 150 m
   no normal e difícil).

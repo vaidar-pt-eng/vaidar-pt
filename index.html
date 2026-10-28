@@ -172,7 +172,7 @@
       <span><i class="dot" style="background:#b5652e"></i>frango +50</span>
       <span><i class="dot" style="background:#e8c75a"></i>banana +1 vida</span>
     </div>
-    <div class="keys">↑ ↓ / W S ou toque em cima e embaixo • → corre • ← segura • P pausa • M silencia</div>
+    <div class="keys">toque e arraste para mover • ou ↑ ↓ / W S • → corre • ← segura • P pausa • M silencia</div>
     <div class="row">
       <span class="lbl">DIFICULDADE</span>
       <button data-dif="facil">FÁCIL</button>
@@ -473,6 +473,9 @@ function novoJogo(){
     lane: 1,
     laneAlvo: 1,
     y: laneY(1),
+    alvoY: laneY(1),      // pode ficar entre raias quando o dedo arrasta
+    arrastando: false,
+    mult: 1,              // velocidade vinda do arraste lateral
     inv: 0,             // invencibilidade pós-dano
     shake: 0,
     obst: [],
@@ -517,23 +520,64 @@ addEventListener("keyup", e => { keys[e.key.toLowerCase()] = false; });
 
 function mudarRaia(d){
   const alvo = Math.max(0, Math.min(LANES-1, game.laneAlvo + d));
-  if (alvo !== game.laneAlvo){ game.laneAlvo = alvo; SFX.lane(); }
+  if (alvo !== game.laneAlvo){
+    game.laneAlvo = alvo;
+    game.alvoY = laneY(alvo);
+    SFX.lane();
+  }
+}
+
+// converte a posição do dedo na tela para a posição no jogo
+function mirar(clientX, clientY){
+  const r = canvas.getBoundingClientRect();
+  if (!r.height) return;
+  game.alvoY = Math.max(ROAD_TOP + 14, Math.min(ROAD_BOT - 14, (clientY - r.top) / r.height * H));
+  // arrastar para os lados acelera ou segura, como um analógico
+  if (game.arrasteX !== undefined){
+    const d = (clientX - game.arrasteX) / r.width;
+    game.mult = Math.max(0.68, Math.min(1.45, 1 + d * 2.4));
+  }
 }
 
 // toque (ou clique): metade de cima sobe, metade de baixo desce.
 // nada aqui depende de media query - tem celular que se declara "pointer:fine"
 // e o jogo ficava sem controle nenhum.
 const touch = document.getElementById("touch");
-function tocar(clientY){
+let toqueX = 0, toqueY = 0, arrastou = false;
+
+function comecarArraste(x, y, id){
   if (state !== ST.PLAY) return;
-  const r = touch.getBoundingClientRect();
-  mudarRaia(clientY - r.top < r.height/2 ? -1 : 1);
+  game.arrastando = true; game.arrasteX = x;
+  toqueX = x; toqueY = y; arrastou = false;
+  if (id !== undefined && touch.setPointerCapture){ try { touch.setPointerCapture(id); } catch(e){} }
 }
+function moverArraste(x, y){
+  if (state !== ST.PLAY || !game.arrastando) return;
+  if (!arrastou && (Math.abs(x - toqueX) > 8 || Math.abs(y - toqueY) > 8)) arrastou = true;
+  if (arrastou) mirar(x, y);
+}
+function soltarArraste(){
+  if (!game || !game.arrastando) return;
+  game.laneAlvo = game.lane;              // retoma as raias de onde o dedo parou
+  if (!arrastou && state === ST.PLAY){
+    const r = touch.getBoundingClientRect();
+    mudarRaia(toqueY - r.top < r.height/2 ? -1 : 1);   // toque curto ainda troca de raia
+  }
+  game.arrastando = false; game.arrasteX = undefined; game.mult = 1;
+}
+
 if (window.PointerEvent){
-  touch.addEventListener("pointerdown", e => { e.preventDefault(); tocar(e.clientY); });
+  touch.addEventListener("pointerdown", e => { e.preventDefault(); comecarArraste(e.clientX, e.clientY, e.pointerId); });
+  touch.addEventListener("pointermove", e => { if (game && game.arrastando){ e.preventDefault(); moverArraste(e.clientX, e.clientY); } });
+  touch.addEventListener("pointerup", e => { e.preventDefault(); soltarArraste(); });
+  touch.addEventListener("pointercancel", soltarArraste);
 } else {
-  touch.addEventListener("touchstart", e => { e.preventDefault(); tocar(e.touches[0].clientY); }, { passive:false });
-  touch.addEventListener("mousedown", e => tocar(e.clientY));
+  touch.addEventListener("touchstart", e => { e.preventDefault(); const t = e.touches[0]; comecarArraste(t.clientX, t.clientY); }, { passive:false });
+  touch.addEventListener("touchmove", e => { e.preventDefault(); const t = e.touches[0]; moverArraste(t.clientX, t.clientY); }, { passive:false });
+  touch.addEventListener("touchend", e => { e.preventDefault(); soltarArraste(); }, { passive:false });
+  touch.addEventListener("mousedown", e => comecarArraste(e.clientX, e.clientY));
+  touch.addEventListener("mousemove", e => moverArraste(e.clientX, e.clientY));
+  touch.addEventListener("mouseup", soltarArraste);
 }
 
 /* ====================================================================
@@ -541,7 +585,7 @@ if (window.PointerEvent){
    ==================================================================== */
 function velocidade(){
   const base = cfg.speed + cfg.ramp * Math.min(game.t, 60) / 6;
-  let mult = 1;
+  let mult = game.mult;
   if (keys["arrowright"] || keys["d"]) mult = 1.45;
   else if (keys["arrowleft"] || keys["a"]) mult = 0.68;
   return base * mult * ESC;
@@ -629,10 +673,9 @@ function atualizar(dt){
   g.scroll += v * dt;
   if (!g.portao) g.dist += v * dt / (18 * ESC);
 
-  // trocar de raia suavemente
-  const alvoY = laneY(g.laneAlvo);
-  g.y += (alvoY - g.y) * Math.min(1, dt * 14);
-  g.lane = g.laneAlvo;
+  // sobe e desce até o alvo: a raia escolhida, ou o dedo arrastando
+  g.y += (g.alvoY - g.y) * Math.min(1, dt * (g.arrastando ? 24 : 14));
+  g.lane = Math.max(0, Math.min(LANES-1, Math.round((g.y - ROAD_TOP) / LANE_H - 0.5)));
 
   if (g.inv > 0) g.inv -= dt;
   if (g.shake > 0) g.shake = Math.max(0, g.shake - dt * 42);
