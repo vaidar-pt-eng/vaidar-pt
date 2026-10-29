@@ -22,5 +22,9 @@ out = head.strip() + "\n\n" + body.strip() + "\n"
 out = out.replace("#app{width:100vw; height:100vh; height:100dvh;",
                   "#app{width:100%; height:100%;")
 
+# o artifact não deixa a página falar com outros sites, então lá o jogo roda sem ranking
+out, n = re.subn(r'const RANKING_URL = "[^"]*";', 'const RANKING_URL = "";', out)
+assert n == 1, "não achei o RANKING_URL no index.html"
+
 io.open(os.path.join(base, "artifact.html"), "w", encoding="utf-8", newline="").write(out)
 print("artifact.html gerado com", len(out), "caracteres")
