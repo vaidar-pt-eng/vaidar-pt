@@ -11,19 +11,19 @@
 </script>
 <style>
   :root{
-    --txt:#4a3726; --dim:#977f63; --line:#e3cba6; --red:#e2574c;
+    --txt:#e6ebff; --dim:#8a95c4; --line:#2b355e; --red:#3ee6ff;
     --mono: ui-monospace, "SFMono-Regular", "Cascadia Mono", Consolas, "Courier New", monospace;
   }
   *{box-sizing:border-box}
-  html,body{margin:0; padding:0; width:300px; height:250px; overflow:hidden; background:#fdf1dd}
+  html,body{margin:0; padding:0; width:300px; height:250px; overflow:hidden; background:#0d1330}
   body{
     color:var(--txt); font-family:var(--mono);
     -webkit-tap-highlight-color:transparent; touch-action:none;
     -webkit-user-select:none; user-select:none;
   }
-  #app{position:relative; width:300px; height:250px; overflow:hidden; background:#fdf1dd}
+  #app{position:relative; width:300px; height:250px; overflow:hidden; background:#0d1330}
   /* borda do banner, por cima de tudo */
-  #app::after{content:""; position:absolute; inset:0; border:1px solid #b89a74; pointer-events:none; z-index:9}
+  #app::after{content:""; position:absolute; inset:0; border:1px solid #2b355e; pointer-events:none; z-index:9}
   canvas{display:block; width:300px; height:250px}
 
   #touch{position:absolute; inset:0; display:none}
@@ -32,34 +32,34 @@
   .screen{
     position:absolute; inset:0; display:none; flex-direction:column;
     align-items:center; justify-content:center; text-align:center;
-    gap:7px; padding:10px 14px; background:rgba(255,248,236,.84);
+    gap:7px; padding:10px 14px; background:rgba(11,17,36,.82);
     animation:fade .25s ease;
   }
   .screen.on{display:flex}
   @keyframes fade{from{opacity:0}to{opacity:1}}
   .eyebrow{color:var(--red); font-size:8px; letter-spacing:.26em; font-weight:700}
-  .eyebrow i{color:#d8232a; font-style:normal; font-size:10px}
-  h1{margin:0; font-size:21px; font-weight:600; letter-spacing:.04em; color:#2a1d12; line-height:1.1}
+  .eyebrow i{color:#ff3d7f; font-style:normal; font-size:10px}
+  h1{margin:0; font-size:21px; font-weight:600; letter-spacing:.04em; color:#ffffff; line-height:1.1}
   h1 small{display:block; font-size:8px; letter-spacing:.24em; color:var(--dim); margin-top:5px; font-weight:400}
-  .lead{margin:0; max-width:262px; color:#6f5b45; font-size:10px; line-height:1.55}
-  .lead b{color:#cf2d3a}
+  .lead{margin:0; max-width:262px; color:#c9d2f0; font-size:10px; line-height:1.55}
+  .lead b{color:#ff5d6e}
   .lead canvas{display:inline-block; width:auto; height:auto; vertical-align:-2px; image-rendering:pixelated}
-  .keys{font-size:8px; color:#9c8468; letter-spacing:.1em}
+  .keys{font-size:8px; color:#8a95c4; letter-spacing:.1em}
   .row{display:flex; gap:6px; align-items:center; justify-content:center}
   button{
     font-family:var(--mono); font-size:10px; letter-spacing:.16em; color:var(--txt);
-    background:#fffaf0; border:1px solid var(--line); padding:7px 10px; cursor:pointer;
+    background:#141b3d; border:1px solid var(--line); padding:7px 10px; cursor:pointer;
   }
-  button:hover{border-color:#c9a271; color:#2f2217}
-  button.primary{border-color:#e08b3a; background:#ffd79a; color:#6b3c0d; padding:9px 26px; font-weight:700}
-  button.primary:hover{background:#ffc877}
-  button.cta{border-color:#cf2d3a; background:#cf2d3a; color:#fff; font-weight:700}
-  button.cta:hover{background:#b3222e; color:#fff}
-  .link{border:0; background:none; padding:2px; font-size:8px; letter-spacing:.14em; color:#b3222e; text-decoration:underline}
-  .link:hover{color:#7e1720}
+  button:hover{border-color:#3ee6ff; color:#fff}
+  button.primary{border-color:#3ee6ff; background:#3ee6ff; color:#0b1124; padding:9px 26px; font-weight:700}
+  button.primary:hover{background:#8af1ff; color:#0b1124}
+  button.cta{border-color:#ff3d7f; background:#ff3d7f; color:#fff; font-weight:700}
+  button.cta:hover{background:#e0266a; color:#fff}
+  .link{border:0; background:none; padding:2px; font-size:8px; letter-spacing:.14em; color:#ff3d7f; text-decoration:underline}
+  .link:hover{color:#ff8ab1}
   .score{display:flex; gap:26px; justify-content:center}
   .score div{font-size:8px; color:var(--dim); letter-spacing:.14em}
-  .score b{display:block; font-size:19px; color:#2f2217; font-weight:400; margin-top:3px}
+  .score b{display:block; font-size:19px; color:#ffffff; font-weight:400; margin-top:3px}
 </style>
 </head>
 <body>
@@ -145,7 +145,7 @@ function draw(sp, x, y, px, alpha, cx){
   if (alpha !== undefined) c2.globalAlpha = 1;
 }
 
-/* o cara sentado no vaso, deslizando pela academia de vaso e tudo */
+/* o cara sentado no vaso, deslizando pela internet de vaso e tudo */
 const PAL_P = { o:"#2a2320", w:"#f4f4f4", W:"#c9ced6", h:"#3a2a1e", s:"#d9a77c", e:"#111111", t:"#cfd8e8", k:"#b8a27a", c:"#3a2a1e" };
 const VASO_CORPO = [
   "oooo..hhhh......",
@@ -279,7 +279,7 @@ const CORACAO = sprite([
   "...r...",
 ], { r:"#d8232a", b:"#ff8a7a" });
 const CORACAO_BORDA = sprite(CORACAO.rows, { r:"#5a1414", b:"#5a1414" });
-const CORACAO_OFF = sprite(CORACAO.rows, { r:"#d9c4a6", b:"#e6d5bc" });
+const CORACAO_OFF = sprite(CORACAO.rows, { r:"#3a4570", b:"#4a5585" });
 
 /* a presidenta aparece quando junta 3 estrelas e segura os T-rex */
 const DILMA = sprite([
@@ -306,18 +306,18 @@ const DILMA = sprite([
 /* tipos de obstáculo: quadros da animação, velocidade extra em relação ao chão e frases de fim */
 const TIPOS = {
   trex:   { sp:TREX,   extra: 0, zig:false, cor:"#8fd16a", fins:[
-    "Um T-rex te alcançou. Braço curtinho, mordida comprida.",
+    "Um T-rex te alcançou. Braço curtinho, CPM lá em cima.",
     "Virou lanche de T-rex sem nem levantar do vaso.",
   ] },
   maluco: { sp:MALUCO, extra:40, zig:true,  cor:"#ff8a6a", fins:[
-    "O maluco te pegou. Nem ele sabe o que queria.",
-    "Atropelado pelo maluco. Ele ainda tá gritando lá atrás.",
+    "O maluco te pegou. Parecia cliente pedindo ajuste sexta às 18h.",
+    "Atropelado pelo maluco. Ele queria a peça pra ontem.",
   ] },
 };
 
 const VITORIAS = [
-  "Atravessou a academia de vaso e tudo. Nenhum T-rex te pegou.",
-  "Escapou sem levantar do vaso. O maluco ficou falando sozinho.",
+  "Converteu de vaso e tudo. Campanha entregue, ROAS lá em cima.",
+  "Chegou na conversão sem levantar do vaso. Meta batida.",
 ];
 
 /* ====================================================================
@@ -672,100 +672,109 @@ function atualizar(dt){
 /* ====================================================================
    7. DESENHO
    ==================================================================== */
-function nuvem(x, y, e){
-  ctx.fillStyle = "#ffffff";
-  ctx.beginPath();
-  ctx.arc(x, y, 11*e, 0, 7);
-  ctx.arc(x + 13*e, y + 3*e, 8*e, 0, 7);
-  ctx.arc(x - 12*e, y + 4*e, 7*e, 0, 7);
-  ctx.fill();
-}
+const FONTE = "ui-monospace, Consolas, monospace";
+const KPIS = [["CTR", "3,2%"], ["ROAS", "4,8x"], ["CPA", "-27%"], ["VIEWS", "1,2M"]];
+const ICONES = ["▶", "♥", "@", "#", "%", "★"];
 
-function estrelaVermelha(cx, cy, r){
-  ctx.beginPath();
-  for (let i = 0; i < 10; i++){
-    const ang = -Math.PI/2 + i * Math.PI/5;
-    const rr = i % 2 ? r * 0.44 : r;
-    const px = cx + Math.cos(ang) * rr, py = cy + Math.sin(ang) * rr;
-    if (i) ctx.lineTo(px, py); else ctx.moveTo(px, py);
+// monitor na parede: alterna gráfico de barras, linha subindo e um KPI
+function monitor(x, y, w, h, n, t){
+  ctx.fillStyle = "#2b355e"; ctx.fillRect(x, y, w, h);
+  ctx.fillStyle = "#0b1124"; ctx.fillRect(x + 3, y + 3, w - 6, h - 6);
+  const ix = x + 3, iy = y + 3, iw = w - 6, ih = h - 6;
+  const tipo = ((n % 3) + 3) % 3;
+  if (tipo === 0){
+    const bw = (iw - 12) / 6;
+    for (let b = 0; b < 6; b++){
+      const alt = Math.round((0.28 + 0.11 * b + 0.07 * Math.sin(t * 3 + b + n)) * (ih - 8));
+      ctx.fillStyle = b % 2 ? "#ff3d7f" : "#3ee6ff";
+      ctx.fillRect(Math.round(ix + 6 + b * bw), iy + ih - 4 - alt, Math.round(bw - 3), alt);
+    }
+  } else if (tipo === 1){
+    ctx.fillStyle = "#3ee6ff18";
+    for (let k = 1; k < 4; k++) ctx.fillRect(ix + 2, Math.round(iy + k * ih / 4), iw - 4, 1);
+    ctx.strokeStyle = "#4ad98a"; ctx.lineWidth = 2;
+    ctx.beginPath();
+    let px = 0, py = 0;
+    for (let k = 0; k <= 8; k++){
+      px = ix + 5 + k * (iw - 10) / 8;
+      py = iy + ih - 6 - (k / 8) * (ih - 14) + Math.sin(k * 1.7 + n) * 3;
+      if (k) ctx.lineTo(px, py); else ctx.moveTo(px, py);
+    }
+    ctx.stroke();
+    ctx.fillStyle = Math.sin(t * 6) > 0 ? "#b6ffd6" : "#4ad98a";
+    ctx.fillRect(px - 2, py - 2, 4, 4);
+  } else {
+    const kpi = KPIS[((Math.floor(n / 3) % 4) + 4) % 4];
+    ctx.textAlign = "left"; ctx.textBaseline = "top";
+    ctx.fillStyle = "#8a95c4"; ctx.font = "700 7px " + FONTE;
+    ctx.fillText(kpi[0], ix + 7, iy + 6);
+    ctx.fillStyle = "#ffffff"; ctx.font = "700 16px " + FONTE;
+    ctx.fillText(kpi[1], ix + 7, iy + 16);
+    ctx.fillStyle = "#4ad98a"; ctx.font = "700 10px " + FONTE;
+    ctx.fillText("▲", ix + iw - 16, iy + 19);
   }
-  ctx.closePath();
-  ctx.fillStyle = "#d8232a";
-  ctx.fill();
 }
 
 function drawFundo(){
-  const g = game, s = g ? g.scroll : 0;
+  const g = game, s = g ? g.scroll : 0, t = g ? g.t : 0;
 
-  ctx.fillStyle = "#fcead2";
+  // parede: painel escuro de dashboard
+  const pg = ctx.createLinearGradient(0, 0, 0, ROAD_TOP);
+  pg.addColorStop(0, "#0d1330"); pg.addColorStop(1, "#1a2350");
+  ctx.fillStyle = pg;
   ctx.fillRect(0, 0, W, ROAD_TOP);
 
-  // janelões com céu e nuvens (parallax lento)
-  const off = (s * 0.14) % 150;
-  for (let x = -150 - off; x < W + 150; x += 150){
-    ctx.fillStyle = "#e3c69c";
-    ctx.fillRect(x + 10, 26, 112, 46);
-    const cg = ctx.createLinearGradient(0, 29, 0, 69);
-    cg.addColorStop(0, "#8fd3f4"); cg.addColorStop(1, "#dcf3ff");
-    ctx.fillStyle = cg;
-    ctx.fillRect(x + 13, 29, 106, 40);
-    nuvem(x + 38, 41, .45);
-    nuvem(x + 94, 58, .35);
-    ctx.fillStyle = "#e3c69c";
-    ctx.fillRect(x + 65, 29, 3, 40);
-    ctx.fillRect(x + 13, 48, 106, 3);
+  // ícones de rede social flutuando bem ao fundo
+  const off0 = (s * 0.25) % 75;
+  let ic = Math.floor(s * 0.25 / 75);
+  ctx.save();
+  ctx.font = "700 11px " + FONTE;
+  ctx.textAlign = "center"; ctx.textBaseline = "middle";
+  for (let x = -75 - off0; x < W + 75; x += 75, ic++){
+    const k = ((ic % ICONES.length) + ICONES.length) % ICONES.length;
+    ctx.fillStyle = k % 2 ? "#ff3d7f55" : "#3ee6ff55";
+    ctx.fillText(ICONES[k], x + 30, ic % 2 ? 30 : 64);
   }
+  ctx.restore();
 
-  // sol entrando pela janela
-  const sx = W * 0.84, sy = 36;
-  const gl = ctx.createRadialGradient(sx, sy, 4, sx, sy, 50);
-  gl.addColorStop(0, "#fff8d2"); gl.addColorStop(.4, "#ffe79a66"); gl.addColorStop(1, "#ffe79a00");
-  ctx.fillStyle = gl;
-  ctx.beginPath(); ctx.arc(sx, sy, 50, 0, 7); ctx.fill();
-  ctx.fillStyle = "#ffdd57";
-  ctx.beginPath(); ctx.arc(sx, sy, 9, 0, 7); ctx.fill();
+  // monitores com os números da campanha (parallax lento)
+  const off = (s * 0.14) % 150;
+  let n = Math.floor(s * 0.14 / 150);
+  for (let x = -150 - off; x < W + 150; x += 150, n++) monitor(x + 10, 26, 112, 46, n, t);
 
-  // plantinhas e halteres coloridos encostados na parede
+  // servidores piscando encostados na parede
   const off2 = (s * 0.45) % 140;
-  const cores = ["#ff6b5e", "#4aa3e8", "#f0a93c", "#5fc27e"];
-  for (let x = -140 - off2; x < W + 140; x += 140){
-    ctx.fillStyle = "#4fb06a";
-    ctx.beginPath(); ctx.arc(x + 20, ROAD_TOP - 24, 8, 0, 7);
-    ctx.arc(x + 13, ROAD_TOP - 18, 6, 0, 7);
-    ctx.arc(x + 27, ROAD_TOP - 18, 6, 0, 7); ctx.fill();
-    ctx.fillStyle = "#d98050";
-    ctx.fillRect(x + 14, ROAD_TOP - 15, 12, 10);
-    ctx.fillStyle = "#cbb08a";
-    ctx.fillRect(x + 70, ROAD_TOP - 19, 50, 13);
-    for (let d = 0; d < 3; d++){
-      ctx.fillStyle = cores[(d + (x|0)) % cores.length] || cores[d];
-      ctx.fillRect(x + 74 + d*15, ROAD_TOP - 24, 11, 5);
+  let sv = Math.floor(s * 0.45 / 140);
+  for (let x = -140 - off2; x < W + 140; x += 140, sv++){
+    ctx.fillStyle = "#222b52"; ctx.fillRect(x + 70, ROAD_TOP - 21, 50, 15);
+    ctx.fillStyle = "#11173a"; ctx.fillRect(x + 72, ROAD_TOP - 19, 30, 11);
+    for (let d = 0; d < 4; d++){
+      const aceso = Math.sin(t * (4 + d) + d * 2 + sv) > -0.2;
+      ctx.fillStyle = aceso ? (d % 2 ? "#4ad98a" : "#3ee6ff") : "#2b355e";
+      ctx.fillRect(x + 105 + (d % 2) * 6, ROAD_TOP - 18 + (d >> 1) * 6, 3, 3);
     }
   }
 
-  // rodapé da parede
-  ctx.fillStyle = "#e8d0ac"; ctx.fillRect(0, ROAD_TOP - 6, W, 6);
-  ctx.fillStyle = "#d3b78e"; ctx.fillRect(0, ROAD_TOP - 6, W, 1);
+  // rodapé de neon
+  ctx.save();
+  ctx.shadowColor = "#3ee6ff"; ctx.shadowBlur = 6;
+  ctx.fillStyle = "#3ee6ff"; ctx.fillRect(0, ROAD_TOP - 2, W, 2);
+  ctx.restore();
 
-  // piso em faixas claras
+  // piso em faixas escuras
   for (let i = 0; i < LANES; i++){
-    ctx.fillStyle = i % 2 ? "#f3ddb6" : "#f9e8ca";
+    ctx.fillStyle = i % 2 ? "#1d2550" : "#1a2146";
     ctx.fillRect(0, ROAD_TOP + LANE_H * i, W, LANE_H + 1);
   }
 
-  // manchas de sol atravessando o piso
-  const off3 = s % 230;
-  ctx.fillStyle = "#fff8dc99";
-  for (let x = -230 - off3; x < W + 230; x += 230){
-    ctx.beginPath();
-    ctx.moveTo(x, ROAD_TOP); ctx.lineTo(x + 60, ROAD_TOP);
-    ctx.lineTo(x + 26, ROAD_BOT); ctx.lineTo(x - 34, ROAD_BOT);
-    ctx.closePath(); ctx.fill();
-  }
+  // grade digital passando no chão
+  ctx.fillStyle = "#3ee6ff14";
+  const off3 = s % 24;
+  for (let x = -off3; x < W; x += 24) ctx.fillRect(Math.round(x), ROAD_TOP, 1, ROAD_BOT - ROAD_TOP);
 
   // divisórias tracejadas
   ctx.save();
-  ctx.strokeStyle = "#ffffffdd"; ctx.lineWidth = 2;
+  ctx.strokeStyle = "#3ee6ff77"; ctx.lineWidth = 2;
   ctx.setLineDash([24, 18]);
   ctx.lineDashOffset = -(s % 42);
   for (let i = 1; i < LANES; i++){
@@ -774,22 +783,22 @@ function drawFundo(){
   }
   ctx.restore();
 
-  // tatames coloridos na beirada de baixo
-  ctx.fillStyle = "#ecd5b0"; ctx.fillRect(0, ROAD_BOT, W, H - ROAD_BOT);
-  ctx.fillStyle = "#d3b78e"; ctx.fillRect(0, ROAD_BOT, W, 1);
-  const tat = ["#bfe3c0", "#ffd9a8", "#cfd8f5", "#ffc9c0"];
+  // linha do tempo da campanha na beirada de baixo
+  ctx.fillStyle = "#0d1330"; ctx.fillRect(0, ROAD_BOT, W, H - ROAD_BOT);
+  ctx.fillStyle = "#ff3d7f"; ctx.fillRect(0, ROAD_BOT, W, 1);
+  const tl = ["#3ee6ff44", "#ff3d7f44", "#4ad98a44", "#f0a93c44"];
   const off5 = (s * 1.15) % 75;
-  let n = Math.floor(s * 1.15 / 75);
-  for (let x = -75 - off5; x < W + 75; x += 75, n++){
-    ctx.fillStyle = tat[((n % tat.length) + tat.length) % tat.length];
+  let m = Math.floor(s * 1.15 / 75);
+  for (let x = -75 - off5; x < W + 75; x += 75, m++){
+    ctx.fillStyle = tl[((m % tl.length) + tl.length) % tl.length];
     ctx.fillRect(x + 4, ROAD_BOT + 4, 67, H - ROAD_BOT - 7);
   }
 }
 
 function sombra(x, y, w, a){
   ctx.save();
-  ctx.globalAlpha = a === undefined ? .16 : a;
-  ctx.fillStyle = "#7a5325";
+  ctx.globalAlpha = a === undefined ? .35 : a;
+  ctx.fillStyle = "#000814";
   ctx.beginPath(); ctx.ellipse(x, y + 3, w/2, w/6, 0, 0, Math.PI*2); ctx.fill();
   ctx.restore();
 }
@@ -804,8 +813,8 @@ function drawPortao(){
   ctx.fillStyle = "#4ad98a";
   ctx.fillRect(x-1, ROAD_TOP-12, 2, ROAD_BOT-ROAD_TOP+16);
   ctx.font = "700 9px ui-monospace, Consolas, monospace";
-  ctx.textAlign = "center"; ctx.fillStyle = "#1c7a4a";
-  ctx.fillText("SAÍDA", x, ROAD_TOP-16);
+  ctx.textAlign = "center"; ctx.fillStyle = "#4ad98a";
+  ctx.fillText("CONVERSÃO", x - 20, ROAD_TOP-16);
   ctx.restore();
 }
 
@@ -855,7 +864,7 @@ function drawDilma(){
 function drawHUD(){
   const g = game;
   const hg = ctx.createLinearGradient(0, 0, 0, 24);
-  hg.addColorStop(0, "#fff8ecf0"); hg.addColorStop(1, "#fff8ec00");
+  hg.addColorStop(0, "#0b1124f0"); hg.addColorStop(1, "#0b112400");
   ctx.fillStyle = hg; ctx.fillRect(0, 0, W, 24);
 
   for (let i = 0; i < g.maxVidas; i++) draw(i < g.vidas ? CORACAO : CORACAO_OFF, 8 + i * 17, 6, 2);
@@ -865,21 +874,21 @@ function drawHUD(){
   ctx.textBaseline = "middle";
   for (let i = 0; i < 3; i++){
     const on = g.escudo > 0 || i < g.estrelas;
-    ctx.fillStyle = on ? "#f0a93c" : "#dcc8aa";
+    ctx.fillStyle = on ? "#ffd84d" : "#3a4570";
     ctx.fillText("★", 62 + i * 12, 13);
   }
 
   // barra até a saída
   const bx = 106, bw = 120, p = Math.min(1, g.dist / CFG.meta);
-  ctx.fillStyle = "#00000018"; ctx.fillRect(bx, 12, bw, 2);
-  ctx.fillStyle = "#f0a93c"; ctx.fillRect(bx, 12, bw * p, 2);
+  ctx.fillStyle = "#ffffff22"; ctx.fillRect(bx, 12, bw, 2);
+  ctx.fillStyle = "#3ee6ff"; ctx.fillRect(bx, 12, bw * p, 2);
   ctx.fillRect(Math.round(bx + bw * p - 3), 10, 6, 6);
 
   ctx.textAlign = "right";
-  ctx.fillStyle = "#2f2217";
+  ctx.fillStyle = "#ffffff";
   ctx.font = "700 11px ui-monospace, Consolas, monospace";
   ctx.fillText(g.pontos, W - 8, 10);
-  ctx.fillStyle = "#8a7054";
+  ctx.fillStyle = "#8a95c4";
   ctx.font = "7px ui-monospace, Consolas, monospace";
   ctx.fillText("PONTOS", W - 8, 19);
   ctx.restore();
@@ -966,7 +975,7 @@ function telaFim(){
   const recorde = g.pontos > best();
   if (recorde) LS.set("vsmp.trex.best", String(g.pontos));
   el("end-eyebrow").textContent = g.venceu ? "MISSÃO CUMPRIDA" : "FIM DE JOGO";
-  el("end-title").textContent = g.venceu ? "Escapou!" : "Virou lanche";
+  el("end-title").textContent = g.venceu ? "Converteu!" : "Virou lanche";
   el("end-sub").textContent = g.venceu ? VITORIAS[(Math.random()*VITORIAS.length)|0] : g.motivo;
   el("end-pts").textContent = g.pontos;
   el("end-best").textContent = best();
