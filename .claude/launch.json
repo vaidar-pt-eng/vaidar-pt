@@ -4,8 +4,38 @@
     {
       "name": "jogo",
       "runtimeExecutable": "python",
-      "runtimeArgs": ["-m", "http.server", "8123"],
+      "runtimeArgs": [
+        "-m",
+        "http.server",
+        "8123"
+      ],
       "port": 8123
+    },
+    {
+      "name": "jamaica",
+      "runtimeExecutable": "python",
+      "runtimeArgs": [
+        "-m",
+        "http.server",
+        "8131",
+        "--directory",
+        "C:/Users/OMZ/Desktop/iseoedodosom-jameicaversions"
+      ],
+      "port": 8131,
+      "autoPort": false
+    },
+    {
+      "name": "midia",
+      "runtimeExecutable": "python",
+      "runtimeArgs": [
+        "-m",
+        "http.server",
+        "8132",
+        "--directory",
+        "C:/Users/OMZ/Desktop/vai-ser-midia-e-performance"
+      ],
+      "port": 8132,
+      "autoPort": false
     }
   ]
 }
