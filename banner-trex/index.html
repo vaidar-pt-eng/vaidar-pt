@@ -1,0 +1,1034 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="ad.size" content="width=300,height=250">
+<meta name="viewport" content="width=300, initial-scale=1">
+<title>Vai ser Mídia e Performance</title>
+<script>
+  // clickTag padrão de HTML5 (Google Ads / DV360 / CM360): a plataforma troca pelo link da campanha
+  var clickTag = "https://vaidar-pt-eng.github.io/vaidar-pt/";
+</script>
+<style>
+  :root{
+    --txt:#4a3726; --dim:#977f63; --line:#e3cba6; --red:#e2574c;
+    --mono: ui-monospace, "SFMono-Regular", "Cascadia Mono", Consolas, "Courier New", monospace;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0; padding:0; width:300px; height:250px; overflow:hidden; background:#fdf1dd}
+  body{
+    color:var(--txt); font-family:var(--mono);
+    -webkit-tap-highlight-color:transparent; touch-action:none;
+    -webkit-user-select:none; user-select:none;
+  }
+  #app{position:relative; width:300px; height:250px; overflow:hidden; background:#fdf1dd}
+  /* borda do banner, por cima de tudo */
+  #app::after{content:""; position:absolute; inset:0; border:1px solid #b89a74; pointer-events:none; z-index:9}
+  canvas{display:block; width:300px; height:250px}
+
+  #touch{position:absolute; inset:0; display:none}
+  #touch.on{display:block}
+
+  .screen{
+    position:absolute; inset:0; display:none; flex-direction:column;
+    align-items:center; justify-content:center; text-align:center;
+    gap:7px; padding:10px 14px; background:rgba(255,248,236,.84);
+    animation:fade .25s ease;
+  }
+  .screen.on{display:flex}
+  @keyframes fade{from{opacity:0}to{opacity:1}}
+  .eyebrow{color:var(--red); font-size:8px; letter-spacing:.26em; font-weight:700}
+  .eyebrow i{color:#d8232a; font-style:normal; font-size:10px}
+  h1{margin:0; font-size:21px; font-weight:600; letter-spacing:.04em; color:#2a1d12; line-height:1.1}
+  h1 small{display:block; font-size:8px; letter-spacing:.24em; color:var(--dim); margin-top:5px; font-weight:400}
+  .lead{margin:0; max-width:262px; color:#6f5b45; font-size:10px; line-height:1.55}
+  .lead b{color:#cf2d3a}
+  .lead canvas{display:inline-block; width:auto; height:auto; vertical-align:-2px; image-rendering:pixelated}
+  .keys{font-size:8px; color:#9c8468; letter-spacing:.1em}
+  .row{display:flex; gap:6px; align-items:center; justify-content:center}
+  button{
+    font-family:var(--mono); font-size:10px; letter-spacing:.16em; color:var(--txt);
+    background:#fffaf0; border:1px solid var(--line); padding:7px 10px; cursor:pointer;
+  }
+  button:hover{border-color:#c9a271; color:#2f2217}
+  button.primary{border-color:#e08b3a; background:#ffd79a; color:#6b3c0d; padding:9px 26px; font-weight:700}
+  button.primary:hover{background:#ffc877}
+  button.cta{border-color:#cf2d3a; background:#cf2d3a; color:#fff; font-weight:700}
+  button.cta:hover{background:#b3222e; color:#fff}
+  .link{border:0; background:none; padding:2px; font-size:8px; letter-spacing:.14em; color:#b3222e; text-decoration:underline}
+  .link:hover{color:#7e1720}
+  .score{display:flex; gap:26px; justify-content:center}
+  .score div{font-size:8px; color:var(--dim); letter-spacing:.14em}
+  .score b{display:block; font-size:19px; color:#2f2217; font-weight:400; margin-top:3px}
+</style>
+</head>
+<body>
+<div id="app">
+  <canvas id="game" width="300" height="250"></canvas>
+
+  <div id="touch"></div>
+
+  <!-- INÍCIO -->
+  <div class="screen on" id="scr-start">
+    <div class="eyebrow"><i>★</i> VAI SER MÍDIA E PERFORMANCE</div>
+    <h1>Corre que é T-REX<small>DE VASO E TUDO</small></h1>
+    <p class="lead">Desvia do <i data-sp="trex"></i> T-rex e do <i data-sp="maluco"></i> maluco.<br>Pega 3 <i data-sp="estrela"></i> e chama a <b>Dilma boladona</b>.</p>
+    <button class="primary" id="btn-start">JOGAR</button>
+    <div class="keys">toque em cima ou embaixo pra trocar de raia</div>
+    <button class="link" data-cta>SAIBA MAIS ›</button>
+  </div>
+
+  <!-- FIM -->
+  <div class="screen" id="scr-end">
+    <div class="eyebrow" id="end-eyebrow">FIM DE JOGO</div>
+    <h1 id="end-title">Virou lanche</h1>
+    <p class="lead" id="end-sub"></p>
+    <div class="score">
+      <div>PONTOS<b id="end-pts">0</b></div>
+      <div>RECORDE<b id="end-best">0</b></div>
+    </div>
+    <div class="row">
+      <button class="primary" id="btn-again">DE NOVO</button>
+      <button class="cta" data-cta>SAIBA MAIS ›</button>
+    </div>
+  </div>
+
+  <!-- PAUSA -->
+  <div class="screen" id="scr-pause">
+    <div class="eyebrow"><i>★</i> VAI SER MÍDIA E PERFORMANCE</div>
+    <h1>Pausado</h1>
+    <button class="primary" id="btn-resume">CONTINUAR</button>
+  </div>
+</div>
+
+<script>
+(() => {
+"use strict";
+
+/* ====================================================================
+   1. CONSTANTES / GEOMETRIA
+   ==================================================================== */
+const W = 300, H = 250;
+const ROAD_TOP = 96, ROAD_BOT = 238;
+const LANES = 3;
+const LANE_H = (ROAD_BOT - ROAD_TOP) / LANES;
+const laneY = i => ROAD_TOP + LANE_H * (i + 0.5);
+const PLAYER_X = 52;
+const PX = 2;                // tamanho do pixel dos sprites
+
+const CFG = { speed:92, ramp:20, spawn:1.25, dens:0.55, lives:3, meta:500 };
+
+const canvas = document.getElementById("game");
+const ctx = canvas.getContext("2d");
+const dpr = Math.min(window.devicePixelRatio || 1, 3);
+canvas.width = W * dpr; canvas.height = H * dpr;
+ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+ctx.imageSmoothingEnabled = false;
+
+/* ====================================================================
+   2. PIXEL ART  (cada sprite é uma matriz de caracteres + paleta)
+   ==================================================================== */
+function sprite(rows, pal){ return { rows, pal, w: rows[0].length, h: rows.length }; }
+
+function draw(sp, x, y, px, alpha, cx){
+  const c2 = cx || ctx;
+  if (alpha !== undefined) c2.globalAlpha = alpha;
+  for (let r = 0; r < sp.rows.length; r++){
+    const row = sp.rows[r];
+    for (let c = 0; c < row.length; c++){
+      const ch = row[c];
+      if (ch === ".") continue;
+      c2.fillStyle = sp.pal[ch];
+      c2.fillRect(Math.round(x + c*px), Math.round(y + r*px), px, px);
+    }
+  }
+  if (alpha !== undefined) c2.globalAlpha = 1;
+}
+
+/* o cara sentado no vaso, deslizando pela academia de vaso e tudo */
+const PAL_P = { o:"#2a2320", w:"#f4f4f4", W:"#c9ced6", h:"#3a2a1e", s:"#d9a77c", e:"#111111", t:"#cfd8e8", k:"#b8a27a", c:"#3a2a1e" };
+const VASO_CORPO = [
+  "oooo..hhhh......",
+  "owwo.hhhhhh.....",
+  "owwo.hhssss.....",
+  "owwo.hssses.....",
+  "owwo..ssss......",
+  "owwo..tttt......",
+  "owwo.tttttts....",
+  "owwo.ttttt.s....",
+  "owwo.ttttt.s....",
+  "owwwwkkkkkkk....",
+  "owwwwkkkkkkk....",
+];
+const PLAYER_A = sprite(VASO_CORPO.concat([
+  ".owwwwwwo..ss...",
+  "..owwwwo...ss...",
+  "..oWWWWo...ss...",
+  "...owwo...ccc...",
+  "...oooo...ccc...",
+]), PAL_P);
+const PLAYER_B = sprite(VASO_CORPO.concat([
+  ".owwwwwwo.ss....",
+  "..owwwwo..ss....",
+  "..oWWWWo..ss....",
+  "...owwo..ccc....",
+  "...oooo..ccc....",
+]), PAL_P);
+
+/* T-rex vindo da direita: cabeção, bracinho curto e rabo pra trás */
+const TREX_CORPO = [
+  "...oooooooo...........",
+  "..oggggggggo..........",
+  "..ogwegggggo..........",
+  "..oggggggggo..........",
+  "..owwwwoggggo.........",
+  "...oooooggggo.........",
+  ".......ogggggo.......o",
+  "......oggggggggo....og",
+  "...oo.ogbbgggggggooggo",
+  "...ogoogbbggggggggggo.",
+  "....oooogbbgggggggo...",
+  ".......ogbbggggggo....",
+  "........ogggggggo.....",
+];
+const TREX_PASSO_A = [
+  "........oggo.oggo.....",
+  "........ogo...ogo.....",
+  ".......oggo..oggo.....",
+  ".......oooo..oooo.....",
+];
+const TREX_PASSO_B = [
+  ".......oggo...oggo....",
+  "......ogo......ogo....",
+  ".....oggo......oggo...",
+  ".....oooo......oooo...",
+];
+function trex(pal){
+  return [sprite(TREX_CORPO.concat(TREX_PASSO_A), pal), sprite(TREX_CORPO.concat(TREX_PASSO_B), pal)];
+}
+const TREX = trex({ o:"#1d2b14", g:"#5aa83c", w:"#ffffff", e:"#111111", b:"#c9e08a" });
+
+/* o maluco: baixinho bravo de chapelão e bigodão, que troca de raia do nada */
+const PAL_M = { o:"#2a1a10", b:"#8a5a2b", s:"#f0b48a", e:"#111111", r:"#e8452c", v:"#2f7d4a", j:"#3b4f8a", c:"#5a3418" };
+const MALUCO_CORPO = [
+  "....oooooooo....",
+  "....obbbbbbo....",
+  "....obbbbbbo....",
+  "obbbbbbbbbbbbbbo",
+  ".oooooooooooooo.",
+  "....osssssso....",
+  "....osesseso....",
+  "...rrrrssrrrr...",
+  "..rrrrrrrrrrrr..",
+  ".rrrrrrrrrrrrrr.",
+  "..rrrrrrrrrrrr..",
+  "...ovvrrrrvvo...",
+  "..sovvvvvvvvos..",
+  "...ovvvvvvvvo...",
+  "...ojjjjjjjjo...",
+];
+const MALUCO = [
+  sprite(MALUCO_CORPO.concat(["...ojjo..ojjo...", "..cccc....cccc.."]), PAL_M),
+  sprite(MALUCO_CORPO.concat(["..ojjo....ojjo..", ".cccc......cccc."]), PAL_M),
+];
+
+const FRANGO = sprite([
+  "....oooo....",
+  "..oommmmoo..",
+  ".ommmmmmmmo.",
+  ".ommmmmmmmo.",
+  ".ommmmmmMMo.",
+  "..ommmmMMo..",
+  "...obbbo....",
+  "...obbbo....",
+  "..obbbbbo...",
+  "..obbbbbo...",
+  "...ooooo....",
+], { o:"#2a1407", m:"#c2702e", M:"#8e4a1c", b:"#efe3c4" });
+
+const BANANA = sprite([
+  "......ooo...",
+  ".....oyyo...",
+  "....oyyyo...",
+  ".ooyyyyyo...",
+  ".oyyyyyo....",
+  ".oyyyyo.....",
+  "..oyyo......",
+  "...oo.......",
+], { o:"#6b5410", y:"#e8c75a" });
+
+const ESTRELA = sprite([
+  "....ooo....",
+  "...oyyyo...",
+  "...oyyyo...",
+  "oooyyyyyooo",
+  "oyyyyyyyyyo",
+  ".oyyyyyyyo.",
+  "..oyyyyyo..",
+  ".oyyo.oyyo.",
+  ".oo.....oo.",
+], { o:"#8a6410", y:"#ffd84d" });
+
+const CORACAO = sprite([
+  ".rr.rr.",
+  "rrbrrrr",
+  "rbrrrrr",
+  "rrrrrrr",
+  ".rrrrr.",
+  "..rrr..",
+  "...r...",
+], { r:"#d8232a", b:"#ff8a7a" });
+const CORACAO_BORDA = sprite(CORACAO.rows, { r:"#5a1414", b:"#5a1414" });
+const CORACAO_OFF = sprite(CORACAO.rows, { r:"#d9c4a6", b:"#e6d5bc" });
+
+/* a presidenta aparece quando junta 3 estrelas e segura os T-rex */
+const DILMA = sprite([
+  ".....oooooooo.....",
+  "ooo.ohhhhhhhho.ooo",
+  "oso.ohhhhhhhho.oso",
+  "oso.ohhsssshho.oso",
+  "oso.ohsessesho.oso",
+  "oso.ohssmmssho.oso",
+  ".ossohhsssshhosso.",
+  ".oss.oh.ss.ho.sso.",
+  ".ossorrrrrrrrosso.",
+  "..o.orygrrrrro.o..",
+  "....orrygrrrro....",
+  "....orrrygrrro....",
+  "....orrrrygrro....",
+  "....orrrrrygro....",
+  ".....orrrrrro.....",
+  ".....oll..llo.....",
+  ".....oll..llo.....",
+  ".....occ..cco.....",
+], { o:"#2f2a2a", h:"#6a4634", s:"#ecc5a4", e:"#2a2320", m:"#a9553f", r:"#cf2d3a", y:"#f5d327", g:"#1c9e4a", l:"#ecc5a4", c:"#2f3a4a" });
+
+/* tipos de obstáculo: quadros da animação, velocidade extra em relação ao chão e frases de fim */
+const TIPOS = {
+  trex:   { sp:TREX,   extra: 0, zig:false, cor:"#8fd16a", fins:[
+    "Um T-rex te alcançou. Braço curtinho, mordida comprida.",
+    "Virou lanche de T-rex sem nem levantar do vaso.",
+  ] },
+  maluco: { sp:MALUCO, extra:40, zig:true,  cor:"#ff8a6a", fins:[
+    "O maluco te pegou. Nem ele sabe o que queria.",
+    "Atropelado pelo maluco. Ele ainda tá gritando lá atrás.",
+  ] },
+};
+
+const VITORIAS = [
+  "Atravessou a academia de vaso e tudo. Nenhum T-rex te pegou.",
+  "Escapou sem levantar do vaso. O maluco ficou falando sozinho.",
+];
+
+/* ====================================================================
+   3. SOM (WebAudio, sem arquivos; só toca depois do toque em JOGAR)
+   ==================================================================== */
+const LS = {
+  get(k, d){ try{ const v = localStorage.getItem(k); return v === null ? d : v; }catch(e){ return d; } },
+  set(k, v){ try{ localStorage.setItem(k, v); }catch(e){} },
+};
+
+let actx = null;
+let muted = false;
+function audio(){ if(!actx) actx = new (window.AudioContext||window.webkitAudioContext)(); return actx; }
+function beep(freq, dur, type, vol){
+  if (muted || !actx) return;
+  try{
+    const a = actx, o = a.createOscillator(), g = a.createGain();
+    o.type = type || "square"; o.frequency.value = freq;
+    g.gain.setValueAtTime(vol || 0.04, a.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.0001, a.currentTime + dur);
+    o.connect(g).connect(a.destination); o.start(); o.stop(a.currentTime + dur);
+  }catch(e){}
+}
+function noise(dur, vol){
+  if (muted || !actx) return;
+  try{
+    const a = actx, n = a.sampleRate * dur;
+    const buf = a.createBuffer(1, n, a.sampleRate), d = buf.getChannelData(0);
+    for (let i=0;i<n;i++) d[i] = (Math.random()*2-1) * (1 - i/n);
+    const src = a.createBufferSource(); src.buffer = buf;
+    const g = a.createGain(); g.gain.value = vol || 0.1;
+    src.connect(g).connect(a.destination); src.start();
+  }catch(e){}
+}
+const SFX = {
+  lane:  () => beep(520, .05, "square", .025),
+  hit:   () => { noise(.3,.13); beep(110,.3,"sawtooth",.07); },
+  pick:  () => { beep(660,.07,"square",.04); setTimeout(()=>beep(990,.09,"square",.04),70); },
+  life:  () => { beep(520,.08,"triangle",.06); setTimeout(()=>beep(780,.1,"triangle",.06),80); setTimeout(()=>beep(1040,.14,"triangle",.06),170); },
+  win:   () => [0,120,240,420].forEach((d,i)=>setTimeout(()=>beep([523,659,784,1047][i],.2,"triangle",.06),d)),
+  over:  () => [0,130,260].forEach((d,i)=>setTimeout(()=>beep([330,260,180][i],.26,"sawtooth",.06),d)),
+};
+
+/* ====================================================================
+   4. ESTADO DO JOGO
+   ==================================================================== */
+const ST = { START:"start", PLAY:"play", PAUSE:"pause", END:"end" };
+let state = ST.START;
+
+let game = null;
+// demo = a cena que anda sozinha atrás da tela inicial
+function novoJogo(demo){
+  // atalho de teste: ?escudo=1 já começa com a Dilma
+  const escudoURL = !demo && new URLSearchParams(location.search).has("escudo");
+  game = {
+    demo: !!demo,
+    meta: demo ? Infinity : CFG.meta,
+    t: 0, scroll: 0, dist: 0,
+    vidas: CFG.lives, maxVidas: CFG.lives,
+    pontos: 0, bonus: 0, frangos: 0,
+    estrelas: 0,          // 3 chamam a Dilma
+    escudo: escudoURL ? 30 : 0,   // segundos de proteção restantes
+    aviso: 0,
+    lane: 1, laneAlvo: 1,
+    y: laneY(1), alvoY: laneY(1),
+    arrastando: false,
+    inv: 0, shake: 0,
+    obst: [], itens: [], parts: [], coracoes: [],
+    corT: 0.6, spawnT: demo ? 0.3 : 0.9, itemT: 2.2,
+    portao: null, acabou: false, motivo: "", venceu: false,
+  };
+}
+
+/* ====================================================================
+   5. ENTRADA
+   ==================================================================== */
+const keys = Object.create(null);
+addEventListener("keydown", e => {
+  const k = e.key.toLowerCase();
+  if (["arrowup","arrowdown"," "].includes(k)) e.preventDefault();
+  if (keys[k]) return;
+  keys[k] = true;
+  if (state === ST.PLAY){
+    if (k === "arrowup" || k === "w") mudarRaia(-1);
+    if (k === "arrowdown" || k === "s") mudarRaia(1);
+    if (k === "p" || k === "escape") pausar(true);
+  } else if (state === ST.PAUSE && (k === "p" || k === "escape")){
+    pausar(false);
+  } else if ((state === ST.START || state === ST.END) && (k === "enter" || k === " ")){
+    comecar();
+  }
+  if (k === "m") muted = !muted;
+});
+addEventListener("keyup", e => { keys[e.key.toLowerCase()] = false; });
+
+function mudarRaia(d){
+  const alvo = Math.max(0, Math.min(LANES-1, game.laneAlvo + d));
+  if (alvo !== game.laneAlvo){
+    game.laneAlvo = alvo;
+    game.alvoY = laneY(alvo);
+    SFX.lane();
+  }
+}
+
+// toque curto: metade de cima sobe, metade de baixo desce; arrastar leva junto
+const touch = document.getElementById("touch");
+let toqueY = 0, arrastou = false;
+
+function yNoJogo(clientY){
+  const r = canvas.getBoundingClientRect();
+  return (clientY - r.top) / r.height * H;
+}
+function comecarArraste(y, id){
+  if (state !== ST.PLAY) return;
+  game.arrastando = true; toqueY = y; arrastou = false;
+  if (id !== undefined && touch.setPointerCapture){ try { touch.setPointerCapture(id); } catch(e){} }
+}
+function moverArraste(y){
+  if (state !== ST.PLAY || !game.arrastando) return;
+  if (!arrastou && Math.abs(y - toqueY) > 6) arrastou = true;
+  if (arrastou) game.alvoY = Math.max(ROAD_TOP + 8, Math.min(ROAD_BOT - 8, yNoJogo(y)));
+}
+function soltarArraste(){
+  if (!game || !game.arrastando) return;
+  game.laneAlvo = game.lane;
+  if (!arrastou && state === ST.PLAY){
+    mudarRaia(yNoJogo(toqueY) < game.y - 6 ? -1 : 1);   // toque acima ou abaixo da personagem
+  } else {
+    game.alvoY = laneY(game.lane);
+  }
+  game.arrastando = false;
+}
+
+if (window.PointerEvent){
+  touch.addEventListener("pointerdown", e => { e.preventDefault(); comecarArraste(e.clientY, e.pointerId); });
+  touch.addEventListener("pointermove", e => { if (game && game.arrastando){ e.preventDefault(); moverArraste(e.clientY); } });
+  touch.addEventListener("pointerup", e => { e.preventDefault(); soltarArraste(); });
+  touch.addEventListener("pointercancel", soltarArraste);
+} else {
+  touch.addEventListener("touchstart", e => { e.preventDefault(); comecarArraste(e.touches[0].clientY); }, { passive:false });
+  touch.addEventListener("touchmove", e => { e.preventDefault(); moverArraste(e.touches[0].clientY); }, { passive:false });
+  touch.addEventListener("touchend", e => { e.preventDefault(); soltarArraste(); }, { passive:false });
+  touch.addEventListener("mousedown", e => comecarArraste(e.clientY));
+  touch.addEventListener("mousemove", e => moverArraste(e.clientY));
+  touch.addEventListener("mouseup", soltarArraste);
+}
+
+/* ====================================================================
+   6. LÓGICA
+   ==================================================================== */
+function velocidade(){
+  return CFG.speed + CFG.ramp * Math.min(game.t, 30) / 30;
+}
+
+function spawnOnda(){
+  // uma raia sempre livre; na demo é a raia da personagem
+  const safe = game.demo ? game.lane : (Math.random() * LANES) | 0;
+  for (let i = 0; i < LANES; i++){
+    if (i === safe) continue;
+    if (Math.random() > CFG.dens) continue;
+    const tipo = (game.demo ? Math.random() < 0.3 : game.dist > 100 && Math.random() < 0.35) ? "maluco" : "trex";
+    const t = TIPOS[tipo];
+    game.obst.push({
+      tipo, t,
+      x: W + 30 + Math.random()*50,
+      lane: i, y: laneY(i),
+      w: t.sp[0].w * PX, h: t.sp[0].h * PX,
+      fase: Math.random()*2,
+      zigT: 0.9 + Math.random()*0.6,
+    });
+  }
+}
+
+function spawnItem(){
+  const lane = (Math.random()*LANES)|0;
+  const pote = ["frango"];
+  if (game.vidas < game.maxVidas) pote.push("banana");
+  if (game.escudo <= 0) pote.push("estrela", "estrela", "estrela");
+  const tipo = pote[(Math.random()*pote.length)|0];
+  const sp = tipo === "banana" ? BANANA : tipo === "estrela" ? ESTRELA : FRANGO;
+  game.itens.push({ tipo, sp, x: W + 20, lane, y: laneY(lane), w: sp.w*PX, h: sp.h*PX, oy: 5, bob: Math.random()*6 });
+}
+
+function soltarCoracao(x, y){
+  game.coracoes.push({ x, y, vy: -(16 + Math.random()*12), fase: Math.random()*6, vida: 1.4 + Math.random()*0.6, t: 0 });
+}
+
+function particulas(x, y, cor, n){
+  for (let i = 0; i < n; i++){
+    game.parts.push({
+      x, y,
+      vx: (Math.random()-0.5) * 110 - 16,
+      vy: (Math.random()-0.5) * 90,
+      vida: 0.4 + Math.random()*0.5,
+      t: 0, cor, s: 1 + Math.random()*1.5,
+    });
+  }
+}
+
+// caixa de colisão: o sprite é desenhado de (y - h + oy) até (y + oy)
+function caixa(e, fx, fy){
+  const px = e.w * fx, py = e.h * fy;
+  const oy = e.oy === undefined ? 9 : e.oy;
+  return { x: e.x - e.w/2 + px, y: e.y - e.h + oy + py, w: e.w - px*2, h: e.h - py*2 };
+}
+function bateu(a, b){
+  return a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y;
+}
+
+function levarDano(obj){
+  game.vidas--;
+  game.inv = 1.5;
+  game.shake = 6;
+  SFX.hit();
+  particulas(obj.x, obj.y - 10, obj.t.cor, 18);
+  const fins = obj.t.fins;
+  if (game.vidas <= 0) fim(false, fins[(Math.random()*fins.length)|0]);
+}
+
+function fim(venceu, motivo){
+  game.acabou = true;
+  game.venceu = venceu;
+  game.motivo = motivo || "";
+  game.shake = 0;
+  state = ST.END;
+  touch.classList.remove("on");
+  venceu ? SFX.win() : SFX.over();
+  telaFim();
+}
+
+function atualizar(dt){
+  const g = game;
+  g.t += dt;
+  const v = velocidade();
+  g.scroll += v * dt;
+  if (!g.portao) g.dist += v * dt / 5;
+
+  g.y += (g.alvoY - g.y) * Math.min(1, dt * (g.arrastando ? 24 : 14));
+  g.lane = Math.max(0, Math.min(LANES-1, Math.round((g.y - ROAD_TOP) / LANE_H - 0.5)));
+
+  if (g.inv > 0) g.inv -= dt;
+  if (g.escudo > 0) g.escudo -= dt;
+  if (g.aviso > 0) g.aviso -= dt;
+  if (g.shake > 0) g.shake = Math.max(0, g.shake - dt * 20);
+
+  if (!g.portao && g.dist >= g.meta){
+    g.portao = { x: W + 40 };
+    SFX.pick();
+  }
+
+  if (!g.portao){
+    g.spawnT -= dt;
+    if (g.spawnT <= 0){
+      spawnOnda();
+      g.spawnT = Math.max(0.68, CFG.spawn - g.t * 0.014) * (0.85 + Math.random()*0.35);
+    }
+    if (!g.demo){
+      g.itemT -= dt;
+      if (g.itemT <= 0){ spawnItem(); g.itemT = 2.4 + Math.random()*1.8; }
+    }
+  }
+
+  const pBox = { x: PLAYER_X - 8, y: g.y - 22, w: 16, h: 28 };
+  if (g.escudo > 0) pBox.w += 40;   // a Dilma segura o que vem pela frente
+
+  for (let i = g.obst.length - 1; i >= 0; i--){
+    const o = g.obst[i];
+    o.x -= (v + o.t.extra) * dt;
+    o.fase += dt * 7;
+    // o maluco troca de raia sozinho (na demo, nunca para a raia da personagem)
+    if (o.t.zig){
+      o.zigT -= dt;
+      if (o.zigT <= 0){
+        const nova = Math.max(0, Math.min(LANES-1, o.lane + (Math.random()<0.5?-1:1)));
+        if (!g.demo || nova !== g.lane) o.lane = nova;
+        o.zigT = 0.75 + Math.random()*0.5;
+      }
+      o.y += (laneY(o.lane) - o.y) * Math.min(1, dt*8);
+    }
+    if (o.x < -40){ g.obst.splice(i,1); g.bonus += 2; continue; }
+    if (g.demo) continue;
+    if (bateu(pBox, caixa(o, .2, .14))){
+      if (g.escudo > 0){                       // barrado pela presidenta
+        g.obst.splice(i,1);
+        g.bonus += 15;
+        particulas(o.x - 6, o.y - 12, "#ffd84d", 14);
+        SFX.lane();
+        continue;
+      }
+      if (g.inv <= 0){
+        g.obst.splice(i,1);
+        levarDano(o);
+        if (g.acabou) return;
+      }
+    }
+  }
+
+  for (let i = g.itens.length - 1; i >= 0; i--){
+    const it = g.itens[i];
+    it.x -= v * dt;
+    it.bob += dt * 5;
+    if (it.x < -30){ g.itens.splice(i,1); continue; }
+    if (bateu(pBox, caixa(it, .1, .12))){
+      g.itens.splice(i,1);
+      if (it.tipo === "banana"){
+        g.vidas = Math.min(g.maxVidas, g.vidas + 1);
+        SFX.life(); particulas(it.x, it.y-10, "#e8c75a", 12);
+      } else if (it.tipo === "estrela"){
+        g.estrelas++;
+        particulas(it.x, it.y-10, "#ffd84d", 12);
+        if (g.estrelas >= 3){
+          g.estrelas = 0; g.escudo = 8; g.aviso = 1.8;
+          for (let k = 0; k < 6; k++) soltarCoracao(PLAYER_X + (Math.random()-.5)*34, g.y - 44 - Math.random()*12);
+          SFX.life();
+        } else SFX.pick();
+      } else {
+        g.frangos++;
+        SFX.pick(); particulas(it.x, it.y-10, "#e6b07a", 10);
+      }
+    }
+  }
+
+  for (let i = g.parts.length - 1; i >= 0; i--){
+    const p = g.parts[i];
+    p.t += dt;
+    if (p.t >= p.vida){ g.parts.splice(i,1); continue; }
+    p.x += p.vx * dt; p.y += p.vy * dt; p.vy += 100 * dt;
+  }
+
+  // coraçõezinhos: de vez em quando, e bem mais com a Dilma por perto
+  g.corT -= dt;
+  if (g.corT <= 0){
+    soltarCoracao(PLAYER_X + (Math.random()-.5)*10, g.y - 40);
+    g.corT = g.escudo > 0 ? 0.3 + Math.random()*0.2 : 1 + Math.random()*0.9;
+  }
+  for (let i = g.coracoes.length - 1; i >= 0; i--){
+    const c = g.coracoes[i];
+    c.t += dt;
+    if (c.t >= c.vida){ g.coracoes.splice(i,1); continue; }
+    c.y += c.vy * dt;
+    c.fase += dt * 4;
+  }
+
+  if (g.portao){
+    g.portao.x -= v * dt;
+    if (g.portao.x <= PLAYER_X){ fim(true); return; }
+  }
+
+  g.pontos = Math.floor(g.dist) + g.frangos * 50 + g.bonus;
+}
+
+/* ====================================================================
+   7. DESENHO
+   ==================================================================== */
+function nuvem(x, y, e){
+  ctx.fillStyle = "#ffffff";
+  ctx.beginPath();
+  ctx.arc(x, y, 11*e, 0, 7);
+  ctx.arc(x + 13*e, y + 3*e, 8*e, 0, 7);
+  ctx.arc(x - 12*e, y + 4*e, 7*e, 0, 7);
+  ctx.fill();
+}
+
+function estrelaVermelha(cx, cy, r){
+  ctx.beginPath();
+  for (let i = 0; i < 10; i++){
+    const ang = -Math.PI/2 + i * Math.PI/5;
+    const rr = i % 2 ? r * 0.44 : r;
+    const px = cx + Math.cos(ang) * rr, py = cy + Math.sin(ang) * rr;
+    if (i) ctx.lineTo(px, py); else ctx.moveTo(px, py);
+  }
+  ctx.closePath();
+  ctx.fillStyle = "#d8232a";
+  ctx.fill();
+}
+
+function drawFundo(){
+  const g = game, s = g ? g.scroll : 0;
+
+  ctx.fillStyle = "#fcead2";
+  ctx.fillRect(0, 0, W, ROAD_TOP);
+
+  // janelões com céu e nuvens (parallax lento)
+  const off = (s * 0.14) % 150;
+  for (let x = -150 - off; x < W + 150; x += 150){
+    ctx.fillStyle = "#e3c69c";
+    ctx.fillRect(x + 10, 26, 112, 46);
+    const cg = ctx.createLinearGradient(0, 29, 0, 69);
+    cg.addColorStop(0, "#8fd3f4"); cg.addColorStop(1, "#dcf3ff");
+    ctx.fillStyle = cg;
+    ctx.fillRect(x + 13, 29, 106, 40);
+    nuvem(x + 38, 41, .45);
+    nuvem(x + 94, 58, .35);
+    ctx.fillStyle = "#e3c69c";
+    ctx.fillRect(x + 65, 29, 3, 40);
+    ctx.fillRect(x + 13, 48, 106, 3);
+  }
+
+  // sol entrando pela janela
+  const sx = W * 0.84, sy = 36;
+  const gl = ctx.createRadialGradient(sx, sy, 4, sx, sy, 50);
+  gl.addColorStop(0, "#fff8d2"); gl.addColorStop(.4, "#ffe79a66"); gl.addColorStop(1, "#ffe79a00");
+  ctx.fillStyle = gl;
+  ctx.beginPath(); ctx.arc(sx, sy, 50, 0, 7); ctx.fill();
+  ctx.fillStyle = "#ffdd57";
+  ctx.beginPath(); ctx.arc(sx, sy, 9, 0, 7); ctx.fill();
+
+  // plantinhas e halteres coloridos encostados na parede
+  const off2 = (s * 0.45) % 140;
+  const cores = ["#ff6b5e", "#4aa3e8", "#f0a93c", "#5fc27e"];
+  for (let x = -140 - off2; x < W + 140; x += 140){
+    ctx.fillStyle = "#4fb06a";
+    ctx.beginPath(); ctx.arc(x + 20, ROAD_TOP - 24, 8, 0, 7);
+    ctx.arc(x + 13, ROAD_TOP - 18, 6, 0, 7);
+    ctx.arc(x + 27, ROAD_TOP - 18, 6, 0, 7); ctx.fill();
+    ctx.fillStyle = "#d98050";
+    ctx.fillRect(x + 14, ROAD_TOP - 15, 12, 10);
+    ctx.fillStyle = "#cbb08a";
+    ctx.fillRect(x + 70, ROAD_TOP - 19, 50, 13);
+    for (let d = 0; d < 3; d++){
+      ctx.fillStyle = cores[(d + (x|0)) % cores.length] || cores[d];
+      ctx.fillRect(x + 74 + d*15, ROAD_TOP - 24, 11, 5);
+    }
+  }
+
+  // rodapé da parede
+  ctx.fillStyle = "#e8d0ac"; ctx.fillRect(0, ROAD_TOP - 6, W, 6);
+  ctx.fillStyle = "#d3b78e"; ctx.fillRect(0, ROAD_TOP - 6, W, 1);
+
+  // piso em faixas claras
+  for (let i = 0; i < LANES; i++){
+    ctx.fillStyle = i % 2 ? "#f3ddb6" : "#f9e8ca";
+    ctx.fillRect(0, ROAD_TOP + LANE_H * i, W, LANE_H + 1);
+  }
+
+  // manchas de sol atravessando o piso
+  const off3 = s % 230;
+  ctx.fillStyle = "#fff8dc99";
+  for (let x = -230 - off3; x < W + 230; x += 230){
+    ctx.beginPath();
+    ctx.moveTo(x, ROAD_TOP); ctx.lineTo(x + 60, ROAD_TOP);
+    ctx.lineTo(x + 26, ROAD_BOT); ctx.lineTo(x - 34, ROAD_BOT);
+    ctx.closePath(); ctx.fill();
+  }
+
+  // divisórias tracejadas
+  ctx.save();
+  ctx.strokeStyle = "#ffffffdd"; ctx.lineWidth = 2;
+  ctx.setLineDash([24, 18]);
+  ctx.lineDashOffset = -(s % 42);
+  for (let i = 1; i < LANES; i++){
+    const y = Math.round(ROAD_TOP + LANE_H * i);
+    ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke();
+  }
+  ctx.restore();
+
+  // tatames coloridos na beirada de baixo
+  ctx.fillStyle = "#ecd5b0"; ctx.fillRect(0, ROAD_BOT, W, H - ROAD_BOT);
+  ctx.fillStyle = "#d3b78e"; ctx.fillRect(0, ROAD_BOT, W, 1);
+  const tat = ["#bfe3c0", "#ffd9a8", "#cfd8f5", "#ffc9c0"];
+  const off5 = (s * 1.15) % 75;
+  let n = Math.floor(s * 1.15 / 75);
+  for (let x = -75 - off5; x < W + 75; x += 75, n++){
+    ctx.fillStyle = tat[((n % tat.length) + tat.length) % tat.length];
+    ctx.fillRect(x + 4, ROAD_BOT + 4, 67, H - ROAD_BOT - 7);
+  }
+}
+
+function sombra(x, y, w, a){
+  ctx.save();
+  ctx.globalAlpha = a === undefined ? .16 : a;
+  ctx.fillStyle = "#7a5325";
+  ctx.beginPath(); ctx.ellipse(x, y + 3, w/2, w/6, 0, 0, Math.PI*2); ctx.fill();
+  ctx.restore();
+}
+
+function drawPortao(){
+  const p = game.portao; if (!p) return;
+  const x = p.x;
+  ctx.save();
+  ctx.fillStyle = "#0e1a14";
+  ctx.fillRect(x-3, ROAD_TOP-12, 7, ROAD_BOT-ROAD_TOP+16);
+  ctx.shadowColor = "#4ad98a"; ctx.shadowBlur = 10;
+  ctx.fillStyle = "#4ad98a";
+  ctx.fillRect(x-1, ROAD_TOP-12, 2, ROAD_BOT-ROAD_TOP+16);
+  ctx.font = "700 9px ui-monospace, Consolas, monospace";
+  ctx.textAlign = "center"; ctx.fillStyle = "#1c7a4a";
+  ctx.fillText("SAÍDA", x, ROAD_TOP-16);
+  ctx.restore();
+}
+
+function drawJogador(){
+  const g = game;
+  const piscando = g.inv > 0 && Math.floor(g.t * 14) % 2 === 0;
+  const passo = Math.floor(g.scroll / 12) % 2 === 0;
+  const sp = passo ? PLAYER_A : PLAYER_B;
+  const w = sp.w * PX, h = sp.h * PX;
+  sombra(PLAYER_X, g.y + 5, 24, .4);
+  // o vaso dá uns pulinhos enquanto desliza
+  if (!piscando) draw(sp, PLAYER_X - w/2, g.y - h + 9 - (passo ? 0 : 1), PX);
+}
+
+function plaquinha(texto, cx, topo, cor){
+  ctx.save();
+  ctx.textAlign = "center"; ctx.textBaseline = "middle";
+  ctx.font = "700 7px ui-monospace, Consolas, monospace";
+  const tw = ctx.measureText(texto).width + 10, th = 11;
+  const x = Math.max(2, Math.min(W - tw - 2, cx - tw/2));
+  ctx.fillStyle = "#fffaf0ee";
+  ctx.fillRect(x, topo, tw, th);
+  ctx.strokeStyle = cor; ctx.lineWidth = 1;
+  ctx.strokeRect(x + .5, topo + .5, tw - 1, th - 1);
+  ctx.fillStyle = cor;
+  ctx.fillText(texto, x + tw/2, topo + 6);
+  ctx.restore();
+}
+
+// a presidenta entra na frente e segura os T-rex
+function drawDilma(){
+  const g = game;
+  const w = DILMA.w * PX, h = DILMA.h * PX;
+  const cx = PLAYER_X + 30;
+  const bob = Math.sin(g.t * 7) * 1.5;
+  const y = g.y - h + 9 + bob;
+  const acabando = g.escudo < 2 && Math.floor(g.t * 9) % 2 === 0;
+  sombra(cx, g.y + 5, 24, .16);
+  if (acabando) return;
+  ctx.save();
+  ctx.shadowColor = "#ffd84d"; ctx.shadowBlur = 8;
+  draw(DILMA, cx - w/2, y, PX);
+  ctx.restore();
+  plaquinha("DILMA BOLADONA", cx, y - 14, "#cf2d3a");
+}
+
+function drawHUD(){
+  const g = game;
+  const hg = ctx.createLinearGradient(0, 0, 0, 24);
+  hg.addColorStop(0, "#fff8ecf0"); hg.addColorStop(1, "#fff8ec00");
+  ctx.fillStyle = hg; ctx.fillRect(0, 0, W, 24);
+
+  for (let i = 0; i < g.maxVidas; i++) draw(i < g.vidas ? CORACAO : CORACAO_OFF, 8 + i * 17, 6, 2);
+
+  ctx.save();
+  ctx.font = "12px ui-monospace, Consolas, monospace";
+  ctx.textBaseline = "middle";
+  for (let i = 0; i < 3; i++){
+    const on = g.escudo > 0 || i < g.estrelas;
+    ctx.fillStyle = on ? "#f0a93c" : "#dcc8aa";
+    ctx.fillText("★", 62 + i * 12, 13);
+  }
+
+  // barra até a saída
+  const bx = 106, bw = 120, p = Math.min(1, g.dist / CFG.meta);
+  ctx.fillStyle = "#00000018"; ctx.fillRect(bx, 12, bw, 2);
+  ctx.fillStyle = "#f0a93c"; ctx.fillRect(bx, 12, bw * p, 2);
+  ctx.fillRect(Math.round(bx + bw * p - 3), 10, 6, 6);
+
+  ctx.textAlign = "right";
+  ctx.fillStyle = "#2f2217";
+  ctx.font = "700 11px ui-monospace, Consolas, monospace";
+  ctx.fillText(g.pontos, W - 8, 10);
+  ctx.fillStyle = "#8a7054";
+  ctx.font = "7px ui-monospace, Consolas, monospace";
+  ctx.fillText("PONTOS", W - 8, 19);
+  ctx.restore();
+}
+
+function drawCena(){
+  const g = game;
+  ctx.save();
+  if (g && g.shake > 0) ctx.translate((Math.random()-.5)*g.shake, (Math.random()-.5)*g.shake);
+  drawFundo();
+
+  // obstáculos e itens de trás pra frente, para quem está mais embaixo ficar na frente
+  const coisas = g.obst.concat(g.itens).sort((a, b) => a.y - b.y);
+  for (const o of coisas){
+    if (o.t){
+      const sp = o.t.sp[Math.floor(o.fase) % 2];
+      sombra(o.x, o.y + 5, o.w * .7);
+      draw(sp, o.x - o.w/2, o.y - o.h + 9, PX);
+    } else {
+      const fy = Math.sin(o.bob) * 2;
+      sombra(o.x, o.y + 5, o.w * .7, .25);
+      ctx.save();
+      ctx.shadowColor = o.tipo === "estrela" ? "#ffd84d" : "#e6b07a";
+      ctx.shadowBlur = 6;
+      draw(o.sp, o.x - o.w/2, o.y - o.h + 5 + fy, PX);
+      ctx.restore();
+    }
+  }
+  drawPortao();
+  drawJogador();
+  if (g.escudo > 0) drawDilma();
+
+  // aviso de que a Dilma chegou
+  if (g.aviso > 0){
+    const k = Math.min(1, (1.8 - g.aviso) * 6);
+    ctx.save();
+    ctx.globalAlpha = Math.min(1, g.aviso * 1.4);
+    ctx.textAlign = "center"; ctx.textBaseline = "middle";
+    ctx.font = "700 " + Math.round(17 + (1 - k) * 8) + "px ui-monospace, Consolas, monospace";
+    ctx.lineWidth = 4; ctx.strokeStyle = "#fffaf0";
+    ctx.strokeText("DILMA BOLADONA", W/2, 82);
+    ctx.fillStyle = "#cf2d3a";
+    ctx.fillText("DILMA BOLADONA", W/2, 82);
+    ctx.restore();
+  }
+
+  for (const c of g.coracoes){
+    const a = Math.min(1, c.t * 5, (c.vida - c.t) * 2);
+    const x = c.x + Math.sin(c.fase) * 3 - CORACAO.w;
+    ctx.globalAlpha = a;
+    for (const [dx, dy] of [[-1,0],[1,0],[0,-1],[0,1]]) draw(CORACAO_BORDA, x+dx, c.y+dy, 2);
+    draw(CORACAO, x, c.y, 2, a);
+  }
+
+  for (const p of g.parts){
+    ctx.globalAlpha = Math.max(0, 1 - p.t / p.vida);
+    ctx.fillStyle = p.cor;
+    ctx.fillRect(p.x, p.y, p.s, p.s);
+  }
+  ctx.globalAlpha = 1;
+
+  if (!g.demo) drawHUD();
+
+  const vg = ctx.createRadialGradient(W/2, H/2, H*0.45, W/2, H/2, H*0.95);
+  vg.addColorStop(0, "#00000000"); vg.addColorStop(1, "#00000044");
+  ctx.fillStyle = vg; ctx.fillRect(0,0,W,H);
+  ctx.restore();
+}
+
+/* ====================================================================
+   8. TELAS
+   ==================================================================== */
+const el = id => document.getElementById(id);
+
+function mostrar(id){
+  for (const s of document.querySelectorAll(".screen")) s.classList.remove("on");
+  if (id) el(id).classList.add("on");
+}
+
+function best(){ return +LS.get("vsmp.trex.best", 0) || 0; }
+
+function telaFim(){
+  const g = game;
+  const recorde = g.pontos > best();
+  if (recorde) LS.set("vsmp.trex.best", String(g.pontos));
+  el("end-eyebrow").textContent = g.venceu ? "MISSÃO CUMPRIDA" : "FIM DE JOGO";
+  el("end-title").textContent = g.venceu ? "Escapou!" : "Virou lanche";
+  el("end-sub").textContent = g.venceu ? VITORIAS[(Math.random()*VITORIAS.length)|0] : g.motivo;
+  el("end-pts").textContent = g.pontos;
+  el("end-best").textContent = best();
+  mostrar("scr-end");
+}
+
+function comecar(){
+  try { const a = audio(); if (a.state === "suspended") a.resume(); } catch(e){}
+  novoJogo(false);
+  mostrar(null);
+  touch.classList.add("on");
+  state = ST.PLAY;
+}
+
+function pausar(p){
+  if (p && state === ST.PLAY){ state = ST.PAUSE; mostrar("scr-pause"); }
+  else if (!p && state === ST.PAUSE){ state = ST.PLAY; mostrar(null); }
+}
+
+// mini sprites dentro do texto da tela inicial
+const MINIS = { trex:TREX[0], maluco:MALUCO[0], estrela:ESTRELA };
+for (const alvo of document.querySelectorAll("[data-sp]")){
+  const sp = MINIS[alvo.dataset.sp];
+  const cv = document.createElement("canvas");
+  cv.width = sp.w * dpr; cv.height = sp.h * dpr;
+  cv.style.width = sp.w + "px"; cv.style.height = sp.h + "px";
+  const c2 = cv.getContext("2d");
+  draw(sp, 0, 0, dpr, undefined, c2);
+  alvo.appendChild(cv);
+}
+
+el("btn-start").addEventListener("click", comecar);
+el("btn-again").addEventListener("click", comecar);
+el("btn-resume").addEventListener("click", () => pausar(false));
+for (const b of document.querySelectorAll("[data-cta]")){
+  b.addEventListener("click", () => window.open(window.clickTag, "_blank"));
+}
+
+/* ====================================================================
+   9. LOOP
+   ==================================================================== */
+document.addEventListener("visibilitychange", () => {
+  if (document.hidden) pausar(true);
+  last = performance.now();
+});
+
+// a cena de fundo da tela inicial para de andar em 30 s (regra de animação dos banners)
+const DEMO_MAX = 30;
+let last = performance.now();
+function loop(now){
+  const dt = Math.min(0.05, (now - last) / 1000);
+  last = now;
+  if (state === ST.PLAY) atualizar(dt);
+  else if (state === ST.START && game.t < DEMO_MAX) atualizar(dt);
+  drawCena();
+  requestAnimationFrame(loop);
+}
+
+novoJogo(true);
+requestAnimationFrame(loop);
+
+})();
+</script>
+</body>
+</html>
